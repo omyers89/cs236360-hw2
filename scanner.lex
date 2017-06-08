@@ -3,8 +3,8 @@
 /* Declarations section */
 #include <stdio.h>
 #include <string.h>
-#include source.tab.hpp
-char *yylval;
+#include "parser.tab.hpp"
+//char *yylval;
 void showToken(char *);
 void printErr();
 void printEscapeErr(char * name);
