@@ -5,7 +5,6 @@
 #include <string.h>
 char *yylval;
 void showToken(char *);
-void showString();
 void printErr();
 void printEscapeErr(char * name);
 char* handleAsciiChar();
@@ -106,19 +105,6 @@ void showToken(char * name)
         printf("%d %s %s\n", yylineno, name, yytext);
 }
 
-//not used
-void showString()
-{
-    
-    yylval = strdup(yytext+1);
-    if (yylval[yyleng-2] != '"')
-       printf("improperly terminated string");
-    else
-        yylval[yyleng-2] = 0;
-    printf("%d %s %s\n", yylineno, "STRING", yylval);
-    //printf("found '%s'\n", yylval);
-}
-
 void printEscapeErr(char * name){
     printf("Error %s %s\n",name, yytext+1);
     exit(0);
@@ -141,41 +127,3 @@ char* handleAsciiChar(){
 
     return buffer;
 }
-
-
-
-/* \"[^"\n]*["\n]          showString(); */
-/* doing nothing */
-/*{digit}+.{digit}+          			showToken("NUMBER");
-{digit}+          			showToken("NUMBER");
-*/
-
-/*
-{digit}+.{digit}+{E}?		showToken("NUMBER");
-{digit}+{E}?          		showToken("NUMBER");
-\"                          { BEGIN STRING; s = buf; }
-<STRING>\\\"                 { *s++ = '\"'; }
-<STRING>\\\                  { *s++ = '\\'; }
-<STRING>\\b                  { *s++ = '\b'; }
-<STRING>\\f                  { *s++ = '\f'; }
-<STRING>\\r                  { *s++ = '\r'; }
-<STRING>\\n                  { *s++ = '\n'; }
-<STRING>\\t                  { *s++ = '\t'; }
-<STRING>\\u{asciiTrailer}     {
-                                char* res = handleAsciiChar();
-                                int i;
-                                printf("RES: %s\n", res);
-                                for(i=0;i<6;i++)
-                                    *s++ = res[i];
-                                free(res);
-                              }
-<STRING>\\[^bfrntu]     { printEscapeErr("Undefined escape sequence"); }
-
-<STRING>\"      { 
-                  *s = 0;
-                  BEGIN 0;
-                  printf("%d %s %s\n", yylineno, "STRING", buf);
-                }
-<STRING>\n      { printf("Error unclosed string\n"); exit(0);}
-<STRING>.       { *s++ = *yytext; }
-*/
