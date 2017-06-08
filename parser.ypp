@@ -9,7 +9,10 @@
 	int yyerror(char * message);
 %}
 
-%token VOID INT BYTE B BOOL TRUE FALSE RETURN IF ELSE WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN RPAREN LBRACE RBRACE ID NUM STRING
+%token VOID INT BYTE B BOOL TRUE FALSE RETURN IF WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN LBRACE RBRACE ID NUM STRING
+
+%nonassoc RPAREN /* solving dangling-else problem */
+%nonassoc ELSE /* solving dangling-else problem */
 
 %right ASSIGN
 %left OR
