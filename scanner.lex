@@ -3,7 +3,7 @@
 /* Declarations section */
 #include <stdio.h>
 #include <string.h>
-//#include source.tab.hpp
+#include source.tab.hpp
 char *yylval;
 void showToken(char *);
 void printErr();
