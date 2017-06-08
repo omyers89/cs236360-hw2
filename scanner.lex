@@ -90,7 +90,8 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 [/]                          showToken("BINOP");
 
 null                        showToken("NULL");
-[0] | [1-9][0-9]*             showToken("NUM");
+"0"                         showToken("NUM");
+[1-9][0-9]*             showToken("NUM");
 [a-zA-Z][a-zA-Z0-9]*        showToken("ID");
 
 \"([^\n\r\"\\]|\\[rnt"\\])+\"            showToken("STRING");
