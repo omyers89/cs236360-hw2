@@ -26,32 +26,8 @@ whitespace		([\t\n ])
 E               ([Ee][+-]?{digit}+)
 asciiTrailer    ({digit}{digit}{digit}{digit})
 
-%%
-\"                          { BEGIN STRING; s = buf; }
-<STRING>\\\"                 { *s++ = '\"'; }
-<STRING>\\\                  { *s++ = '\\'; }
-<STRING>\\b                  { *s++ = '\b'; }
-<STRING>\\f                  { *s++ = '\f'; }
-<STRING>\\r                  { *s++ = '\r'; }
-<STRING>\\n                  { *s++ = '\n'; }
-<STRING>\\t                   { *s++ = '\t'; }
-<STRING>\\u{asciiTrailer}     {
-                                char* res = handleAsciiChar();
-                                int i;
-                                printf("RES: %s\n", res);
-                                for(i=0;i<6;i++)
-                                    *s++ = res[i];
-                                free(res);
-                              }
-<STRING>\\[^bfrntu]     { printEscapeErr("Undefined escape sequence"); }
 
-<STRING>\"      { 
-                  *s = 0;
-                  BEGIN 0;
-                  printf("%d %s %s\n", yylineno, "STRING", buf);
-                }
-<STRING>\n      { printf("Error unclosed string\n"); exit(0);}
-<STRING>.       { *s++ = *yytext; }
+%%
 
 \/\/             { BEGIN LN_COMM; s = buf; }
 <LN_COMM>\n      { 
@@ -63,8 +39,7 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 
 \/\*            { BEGIN BK_COMM; s = buf; *s++ = '/'; *s++='*';}
 <BK_COMM>\*\/      { 
-                    
-                    *s++='*';
+                  *s++='*';
                   *s++ = '/';
                   *s = 0;
                   BEGIN 0;
@@ -75,20 +50,54 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 <BK_COMM>.    { *s++ = *yytext; }
 
 
-\{                           showToken("OBJ_START");
-\}                           showToken("OBJ_END");
-\[                           showToken("ARR_START");
-\]                           showToken("ARR_END");
-:                           showToken("COLON");
-,                           showToken("COMMA");
+
 {digit}+.{digit}+{E}?		showToken("NUMBER");
-{digit}+{E}?          			showToken("NUMBER");
-
-
+{digit}+{E}?          		showToken("NUMBER");
 {whitespace}				;
-true                showToken("TRUE");
-false                showToken("FALSE");
-null                showToken("NULL");
+void                        showToken("VOID");
+int                         showToken("INT");
+byte                        showToken("BYTE");
+int                         showToken("INT");
+b                           showToken("B");
+bool                        showToken("BOOL");
+and                         showToken("AND");
+or                          showToken("OR");
+not                         showToken("NOT");
+true                        showToken("TRUE");
+false                       showToken("FALSE");
+return                       showToken("RETURN");
+if                       showToken("IF");
+else                       showToken("ELSE");
+while                       showToken("WHILE");
+switch                       showToken("SWITCH");
+case                       showToken("CASE");
+break                       showToken("BREAK");
+:                           showToken("COLON");
+;                           showToken("SC");
+,                           showToken("COMMA");
+\(                          showToken("LPAREN");
+\)                          showToken("RPAREN");
+\{                          showToken("LBRACE");
+\}                          showToken("RBRACE");
+=                           showToken("ASSIGN");
+==                          showToken("RELOP");
+!=                          showToken("RELOP");
+<                          showToken("RELOP");
+>                          showToken("RELOP");
+<=                          showToken("RELOP");
+>=                          showToken("RELOP");
+\+                          showToken("BINOP");
+-                          showToken("BINOP");
+\*                          showToken("BINOP");
+\/                          showToken("BINOP");
+{letter}{letter | digit}*   showToken("ID");
+0 | [1-9][0-9]*             showToken("NUM");
+"([^\n\r\"\\]|\\[rnt"\\])+"             showToken("NUM");
+
+
+
+
+null                        showToken("NULL");
 <<EOF>>		{showToken("EOF"); exit(1);}
 .		            printErr();
 
@@ -141,4 +150,32 @@ char* handleAsciiChar(){
 /* doing nothing */
 /*{digit}+.{digit}+          			showToken("NUMBER");
 {digit}+          			showToken("NUMBER");
+*/
+
+/*
+\"                          { BEGIN STRING; s = buf; }
+<STRING>\\\"                 { *s++ = '\"'; }
+<STRING>\\\                  { *s++ = '\\'; }
+<STRING>\\b                  { *s++ = '\b'; }
+<STRING>\\f                  { *s++ = '\f'; }
+<STRING>\\r                  { *s++ = '\r'; }
+<STRING>\\n                  { *s++ = '\n'; }
+<STRING>\\t                  { *s++ = '\t'; }
+<STRING>\\u{asciiTrailer}     {
+                                char* res = handleAsciiChar();
+                                int i;
+                                printf("RES: %s\n", res);
+                                for(i=0;i<6;i++)
+                                    *s++ = res[i];
+                                free(res);
+                              }
+<STRING>\\[^bfrntu]     { printEscapeErr("Undefined escape sequence"); }
+
+<STRING>\"      { 
+                  *s = 0;
+                  BEGIN 0;
+                  printf("%d %s %s\n", yylineno, "STRING", buf);
+                }
+<STRING>\n      { printf("Error unclosed string\n"); exit(0);}
+<STRING>.       { *s++ = *yytext; }
 */
