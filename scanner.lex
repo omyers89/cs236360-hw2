@@ -99,12 +99,12 @@ null                       {    showToken("NULL");      return NULL;}
 
 %%
 
-void showToken(string const& name)
+void showToken(std::string name)
 {
         printf("%d %s %s\n", yylineno, name, yytext);
 }
 
-void printEscapeErr(string const& name){
+void printEscapeErr(std::string name){
     printf("Error %s %s\n",name, yytext+1);
     exit(0);
 }
