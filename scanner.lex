@@ -5,9 +5,9 @@
 #include <string.h>
 #include "parser.tab.hpp"
 //char *yylval;
-void showToken(char *);
+void showToken(string);
 void printErr();
-void printEscapeErr(char * name);
+void printEscapeErr(string);
 char* handleAsciiChar();
 char buf[100];
 char *s;
@@ -99,12 +99,12 @@ null                       {    showToken("NULL");      return NULL;}
 
 %%
 
-void showToken(std::string name)
+void showToken(string name)
 {
         printf("%d %s %s\n", yylineno, name, yytext);
 }
 
-void printEscapeErr(std::string name){
+void printEscapeErr(string name){
     printf("Error %s %s\n",name, yytext+1);
     exit(0);
 }
