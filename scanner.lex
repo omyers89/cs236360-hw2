@@ -53,12 +53,12 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 
 
 {whitespace}				;
-"void"                          {showToken("void"); return VOID;}
-"int"                          {showToken("int");      return INT;}
-"byte"                         {showToken("byte"); return BYTE;}
-"b"                            {showToken("b"); return B;}
-"bool"                         {showToken("bool"); return BOOL;}
-"and"                          {showToken("and"); return AND;}
+"void"                          {showToken("VOID"); return VOID;}
+"int"                          {showToken("INT");      return INT;}
+"byte"                         {showToken("BYTE"); return BYTE;}
+"b"                            {showToken("B"); return B;}
+"bool"                         {showToken("BOOL"); return BOOL;}
+"and"                          {showToken("AND"); return AND;}
 "or"                           {showToken("OR"); return OR;}
 "not"                          {showToken("NOT");        return NOT;} 
 "true"                         {showToken("TRUE");   return TRUE;}
@@ -99,12 +99,12 @@ null                       {    showToken("NULL");      return NULL;}
 
 %%
 
-void showToken(char * name)
+void showToken(const string &name)
 {
         printf("%d %s %s\n", yylineno, name, yytext);
 }
 
-void printEscapeErr(char * name){
+void printEscapeErr(const string &name){
     printf("Error %s %s\n",name, yytext+1);
     exit(0);
 }
