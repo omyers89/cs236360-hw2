@@ -1,0 +1,93 @@
+%{
+	#include "attributes.h"
+	#include <iostream>
+	#include <stdlib.h>
+
+	using namespace std;
+
+	extern int yylex();
+	int yyerror(char * message);
+%}
+
+%%
+
+Program	: Funcs
+	;
+
+Funcs : FuncDecl Funcs | /*epsilon*/
+	;
+
+FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE
+    ;
+
+RetType : Type | VOID
+    ;
+
+Formals : FormalsList | /*epsilon*/
+    ;
+
+FormalsList : FormalDecl | FormalDecl COMMA FormalsList
+    ;
+
+FormalDecl : Type ID
+    ;
+
+Statements : Statement | Statements Statement
+    ;
+
+Statement : LBRACE Statements RBRACE |
+            Type ID SC |
+            Type ID ASSIGN Exp SC |
+            ID ASSIGN Exp SC |
+            Call SC |
+            RETURN SC |
+            RETURN Exp SC |
+            IF LPAREN Exp RPAREN Statement |
+            IF LPAREN Exp RPAREN Statement ELSE Statement |
+            WHILE LPAREN Exp RPAREN Statement |
+            BREAK SC |
+            SWITCH LPAREN Exp RPAREN LBRACE CaseList RBRACE SC
+    ;
+
+CaseList : CaseStat CaseList | CaseStat
+    ;
+
+CaseStat : CASE NUM COLON Statement BREAK SC |
+           CASE NUM B COLON Statement BREAK SC
+    ;
+
+Call : ID LPAREN ExpList RPAREN | ID LPAREN RPAREN
+    ;
+
+ExpList : Exp | Exp COMMA ExpList
+    ;
+
+Type : INT | BYTE | BOOL
+    ;
+
+Exp : LPAREN Exp RPAREN |
+      Exp BINOP Exp |
+      ID |
+      Call |
+      NUM |
+      NUM B |
+      STRING |
+      TRUE |
+      FALSE |
+      NOT Exp |
+      Exp AND Exp |
+      Exp OR Exp |
+      Exp RELOP Exp
+    ;
+%%
+
+int main()
+{
+	yyparse();
+}
+
+int yyerror(char * message)
+{
+	cout<<"Parse error: "<<message<<endl;
+	exit(0);
+}
