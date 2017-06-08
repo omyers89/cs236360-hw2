@@ -9,6 +9,15 @@
 	int yyerror(char * message);
 %}
 
+%token VOID INT BYTE B BOOL TRUE FALSE RETURN IF ELSE WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN RPAREN LBRACE RBRACE ID NUM STRING
+
+%right ASSIGN
+%left OR
+%left AND
+%left RELOP
+%left BINOP
+%right NOT
+
 %%
 
 Program	: Funcs
