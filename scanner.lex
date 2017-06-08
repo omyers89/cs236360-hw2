@@ -3,6 +3,7 @@
 /* Declarations section */
 #include <stdio.h>
 #include <string.h>
+//#include source.tab.hpp
 char *yylval;
 void showToken(char *);
 void printErr();
@@ -52,48 +53,46 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 
 
 {whitespace}				;
-"void"                      showToken("VOID");
-"int"                         showToken("INT");
-"byte"                        showToken("BYTE");
-"b"                           showToken("B");
-"bool"                        showToken("BOOL");
-"and"                        showToken("AND");
-"or"                          showToken("OR");
-"not"                         showToken("NOT");
-"true"                        showToken("TRUE");
-"false"                       showToken("FALSE");
-"return"                       showToken("RETURN");
-"if"                       showToken("IF");
-"else"                       showToken("ELSE");
-"while"                       showToken("WHILE");
-"switch"                       showToken("SWITCH");
-"case"                       showToken("CASE");
-"break"                       showToken("BREAK");
-\:                           showToken("COLON");
-\;                           showToken("SC");
-\,                           showToken("COMMA");
-\(                          showToken("LPAREN");
-\)                          showToken("RPAREN");
-\{                          showToken("LBRACE");
-\}                          showToken("RBRACE");
-\=                           showToken("ASSIGN");
-\=\=                          showToken("RELOP");
-\!\=                          showToken("RELOP");
-\<                          showToken("RELOP");
-\>                          showToken("RELOP");
-\<\=                          showToken("RELOP");
-[>][=]                          showToken("RELOP");
-[+]                          showToken("BINOP");
-[-]                          showToken("BINOP");
-[*]                          showToken("BINOP");
-[/]                          showToken("BINOP");
-
-null                        showToken("NULL");
-"0"                         showToken("NUM");
-[1-9][0-9]*             showToken("NUM");
-[a-zA-Z][a-zA-Z0-9]*        showToken("ID");
-
-\"([^\n\r\"\\]|\\[rnt"\\])+\"            showToken("STRING");
+"void"                          {showToken("VOID"); return VOID;}
+"int"                          {showToken("INT");      return INT;}
+"byte"                         {showToken("BYTE"); return BYTE;}
+"b"                            {showToken("B"); return B;}
+"bool"                         {showToken("BOOL"); return BOOL;}
+"and"                          {showToken("AND"); return AND;}
+"or"                           {showToken("OR"); return OR;}
+"not"                          {showToken("NOT");        return NOT;} 
+"true"                         {showToken("TRUE");   return TRUE;}
+"false"                        {showToken("FALSE");   return FALSE;}
+"return"                       {showToken("RETURN");   return RETURN;}
+"if"                           {showToken("IF");   return IF;}
+"else"                     { showToken("ELSE");       return ELSE;}    
+"while"                    {  showToken("WHILE");     return WHILE;}
+"switch"                   {   showToken("SWITCH");     return SWITCH;}
+"case"                     { showToken("CASE");     return CASE;}
+"break"                    {  showToken("BREAK");     return BREAK;}
+\:                         { showToken("COLON");     return COLON;}
+\;                         {    showToken("SC");     return SC;}
+\,                         {    showToken("COMMA");     return COMMA;}
+\(                         {    showToken("LPAREN");     return LPAREN;}
+\)                         {    showToken("RPAREN");     return RPAREN;}
+\{                         {    showToken("LBRACE");     return LBRACE;}
+\}                         {    showToken("RBRACE");     return RBRACE;}
+\=                         {    showToken("ASSIGN");     return ASSIGN;}
+\=\=                       {    showToken("RELOP");     return  RELOP;}  
+\!\=                       {    showToken("RELOP");     return  RELOP;}
+\<                         {    showToken("RELOP");     return  RELOP;}
+\>                         {    showToken("RELOP");     return  RELOP;}
+\<\=                       {    showToken("RELOP");     return  RELOP;}
+[>][=]                     {    showToken("RELOP");     return  RELOP;}
+[+]                        {    showToken("BINOP");     return   BINOP;}
+[-]                        {    showToken("BINOP");     return  BINOP;}
+[*]                        {    showToken("BINOP");     return  BINOP;}
+[/]                        {    showToken("BINOP");     return  BINOP;}
+null                       {    showToken("NULL");      return NULL;}
+"0"                        {    showToken("NUM");       return NUM;}
+[1-9][0-9]*                {    showToken("NUM");       return NUM;}
+[a-zA-Z][a-zA-Z0-9]*       {    showToken("ID");        return ID;}
+\"([^\n\r\"\\]|\\[rnt"\\])+\"  { showToken("STRING");       return STRING;}
 
 <<EOF>>		{showToken("EOF"); exit(1);}
 .		            printErr();
