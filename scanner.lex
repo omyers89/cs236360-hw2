@@ -53,12 +53,12 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 
 
 {whitespace}				;
-"void"                          {showToken("VOID"); return VOID;}
-"int"                          {showToken("INT");      return INT;}
-"byte"                         {showToken("BYTE"); return BYTE;}
-"b"                            {showToken("B"); return B;}
-"bool"                         {showToken("BOOL"); return BOOL;}
-"and"                          {showToken("AND"); return AND;}
+"void"                          {showToken("void"); return VOID;}
+"int"                          {showToken("int");      return INT;}
+"byte"                         {showToken("byte"); return BYTE;}
+"b"                            {showToken("b"); return B;}
+"bool"                         {showToken("bool"); return BOOL;}
+"and"                          {showToken("and"); return AND;}
 "or"                           {showToken("OR"); return OR;}
 "not"                          {showToken("NOT");        return NOT;} 
 "true"                         {showToken("TRUE");   return TRUE;}
