@@ -1,8 +1,11 @@
+void printOk(bool isOk) {
+    if (isOk) print("ok");
+}
+
+void main()
 {
-	"student" : "Steve",
-	"assignments" : [
-	  /* list of grades per assignment */
-	  { "assignment" : "hw3", "grade" : 100 },
-	  { "assignment" : "hw1", "grade" : 80 }
-	]
+    int x = 4;
+    byte y = 100 b;
+    printOk(x>y);
+    int z;
 }
