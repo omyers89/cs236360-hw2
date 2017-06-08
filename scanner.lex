@@ -14,7 +14,7 @@ char *s;
 
 %}
 
-%x STRING
+
 %x LN_COMM
 %x BK_COMM
 %option yylineno
@@ -51,53 +51,50 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 
 
 
-{digit}+.{digit}+{E}?		showToken("NUMBER");
-{digit}+{E}?          		showToken("NUMBER");
+
 {whitespace}				;
-void                        showToken("VOID");
-int                         showToken("INT");
-byte                        showToken("BYTE");
-int                         showToken("INT");
-b                           showToken("B");
-bool                        showToken("BOOL");
-and                         showToken("AND");
-or                          showToken("OR");
-not                         showToken("NOT");
-true                        showToken("TRUE");
-false                       showToken("FALSE");
-return                       showToken("RETURN");
-if                       showToken("IF");
-else                       showToken("ELSE");
-while                       showToken("WHILE");
-switch                       showToken("SWITCH");
-case                       showToken("CASE");
-break                       showToken("BREAK");
-:                           showToken("COLON");
-;                           showToken("SC");
-,                           showToken("COMMA");
+"void"                      showToken("VOID");
+"int"                         showToken("INT");
+"byte"                        showToken("BYTE");
+"b"                           showToken("B");
+"bool"                        showToken("BOOL");
+"and"                        showToken("AND");
+"or"                          showToken("OR");
+"not"                         showToken("NOT");
+"true"                        showToken("TRUE");
+"false"                       showToken("FALSE");
+"return"                       showToken("RETURN");
+"if"                       showToken("IF");
+"else"                       showToken("ELSE");
+"while"                       showToken("WHILE");
+"switch"                       showToken("SWITCH");
+"case"                       showToken("CASE");
+"break"                       showToken("BREAK");
+\:                           showToken("COLON");
+\;                           showToken("SC");
+\,                           showToken("COMMA");
 \(                          showToken("LPAREN");
 \)                          showToken("RPAREN");
 \{                          showToken("LBRACE");
 \}                          showToken("RBRACE");
-=                           showToken("ASSIGN");
-==                          showToken("RELOP");
-!=                          showToken("RELOP");
-<                          showToken("RELOP");
->                          showToken("RELOP");
-<=                          showToken("RELOP");
->=                          showToken("RELOP");
-\+                          showToken("BINOP");
--                          showToken("BINOP");
-\*                          showToken("BINOP");
-\/                          showToken("BINOP");
-{letter}{letter | digit}*   showToken("ID");
-0 | [1-9][0-9]*             showToken("NUM");
-"([^\n\r\"\\]|\\[rnt"\\])+"             showToken("NUM");
-
-
-
+\=                           showToken("ASSIGN");
+\=\=                          showToken("RELOP");
+\!\=                          showToken("RELOP");
+\<                          showToken("RELOP");
+\>                          showToken("RELOP");
+\<\=                          showToken("RELOP");
+[>][=]                          showToken("RELOP");
+[+]                          showToken("BINOP");
+[-]                          showToken("BINOP");
+[*]                          showToken("BINOP");
+[/]                          showToken("BINOP");
 
 null                        showToken("NULL");
+0 | [1-9][0-9]*             showToken("NUM");
+[a-zA-Z][a-zA-Z0-9]*        showToken("ID");
+
+\"([^\n\r\"\\]|\\[rnt"\\])+\"            showToken("STRING");
+
 <<EOF>>		{showToken("EOF"); exit(1);}
 .		            printErr();
 
@@ -153,6 +150,8 @@ char* handleAsciiChar(){
 */
 
 /*
+{digit}+.{digit}+{E}?		showToken("NUMBER");
+{digit}+{E}?          		showToken("NUMBER");
 \"                          { BEGIN STRING; s = buf; }
 <STRING>\\\"                 { *s++ = '\"'; }
 <STRING>\\\                  { *s++ = '\\'; }
