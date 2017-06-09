@@ -6,12 +6,11 @@ using namespace std;
 
 typedef enum{_BOOL, _INT, _BYTE, _STRING, _VOID} varType;
 typedef enum{_FUNC, _IF, _WHILE, _CASE} scopeType;
-typedef enum{_TRUE, _FALSE} booleanVal;
 
 typedef struct varData{
     int numVal;
     string stringVal;
-    booleanVal boolVal;
+    bool boolVal;
     string varName;
     varType type;
 }STYPE;

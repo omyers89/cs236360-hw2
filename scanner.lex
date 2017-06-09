@@ -85,14 +85,14 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 "not"                          {showToken("NOT");        return NOT;} 
 "true"                         {
                                     showToken("TRUE");
-                                    yylval.boolVal = _TRUE;
+                                    yylval.boolVal = true;
                                     yylval.type = _BOOL;
                                     return TRUE;
                                }
 
 "false"                        {
                                     showToken("FALSE");
-                                    yylval.boolVal = _FALSE;
+                                    yylval.boolVal = false;
                                     yylval.type = _BOOL;
                                     return FALSE;
                                }
@@ -134,7 +134,6 @@ null                       {    showToken("NULL");      return NULL;}
                                 showToken("NUM");
                                 yylval.numVal = atoi(yytext);
                                 yylval.type = _INT;
-                                cout << yylval.type << ", " << yylval.numVal << endl;
                                 return NUM;
                            }
 

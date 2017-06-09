@@ -1,6 +1,7 @@
 %{
 	#include "contracts.hpp"
 	#include "output.hpp"
+	#include "SymbolTable.h"
 	#include <iostream>
 	#include <stdlib.h>
 
@@ -9,6 +10,7 @@
 	extern int yylex();
 	int yyerror(char * message);
 	extern int yylineno;
+	SymbolTable* symbolTable;
 %}
 
 %token VOID INT BYTE B BOOL TRUE FALSE RETURN IF WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN LBRACE RBRACE ID NUM STRING
@@ -24,16 +26,23 @@
 %right NOT
 
 %%
-Test : Statement {$$.type = $1.type;}
-    ;
 
 Program	: Funcs
+          {
+            symbolTable->EndProg();
+          }
 	;
 
-Funcs : FuncDecl Funcs | /*epsilon*/
+Funcs : FuncDecl Funcs
+        {
+
+        } | /*epsilon*/
 	;
 
 FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE
+           {
+                symbolTable->AddFunc($2.varName,$1.type);
+           }
     ;
 
 RetType : Type | VOID
@@ -48,13 +57,13 @@ FormalsList : FormalDecl | FormalDecl COMMA FormalsList
 FormalDecl : Type ID
     ;
 
-Statements : Statement | Statements Statement
+Statements : Statement | Statements Statement {$$.type = $2.type;}
     ;
 
 Statement : LBRACE Statements RBRACE |
             Type ID SC |
             Type ID ASSIGN Exp SC |
-            ID ASSIGN Exp SC {$$.type = $3.type;} |
+            ID ASSIGN Exp SC {$$.type = $3.type; cout << "type: " << $3.type << " val: " << $3.numVal << " boolVal: " << $3.boolVal << endl;} |
             Call SC |
             RETURN SC |
             RETURN Exp SC {$$.type = $1.type;} |
@@ -94,9 +103,14 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       NOT Exp {$$.type = $1.type;} |
       Exp AND Exp
       {
-            if($1.type != _BOOL || $1.type != $2.type)
+            if($1.type != _BOOL || $1.type != $3.type)
+            {
                 output::errorMismatch(yylineno);
-            {$$.type = $1.type;}
+                exit(0);
+            }
+            $$.type = $1.type;
+            $$.boolVal = $1.boolVal && $3.boolVal;
+
       } |
       Exp OR Exp {$$.type = $1.type;} |
       Exp RELOP Exp {$$.type = $1.type;}
@@ -105,6 +119,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
 
 int main()
 {
+	symbolTable = new SymbolTable();
 	yyparse();
 }
 
