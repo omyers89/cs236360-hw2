@@ -2,7 +2,6 @@
 #include "SymbolTable.h"
 
 
-Table::Table(Table* parentTable, scopeType newScopeType) :_parentTable(parentTable), _scopeType(newScopeType){}
 	
 //VarData Table::get(string varName){
 //	

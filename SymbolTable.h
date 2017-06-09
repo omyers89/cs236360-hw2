@@ -5,10 +5,10 @@
 #include <list>
 #include <stack>
 #include <iostream>
+#include "contracts.hpp"
+
 using namespace std;
 
-typedef enum{BOOL, INT, STRING} varType;
-typedef enum{FUNC,IF,WHILE,CASE} scopeType;
 
 typedef struct {
 	varType t;
