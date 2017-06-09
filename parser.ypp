@@ -1,5 +1,5 @@
 %{
-	#include "attributes.h"
+	#include "contracts.hpp"
 	#include <iostream>
 	#include <stdlib.h>
 
@@ -29,7 +29,7 @@ Program	: Funcs
 Funcs : FuncDecl Funcs | /*epsilon*/
 	;
 
-FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE
+FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE {std::cout << $1.name << endl;}
     ;
 
 RetType : Type | VOID

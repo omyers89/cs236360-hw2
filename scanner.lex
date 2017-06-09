@@ -1,13 +1,16 @@
 %{
 
 /* Declarations section */
+
 #include <stdio.h>
 #include <string.h>
+#include <string>
+#include <iostream>
+#include "contracts.hpp"
 #include "parser.tab.hpp"
-//char *yylval;
-void showToken(char *);
+void showToken(std::string name);
 void printErr();
-void printEscapeErr(char * name);
+void printEscapeErr(std::string name);
 char* handleAsciiChar();
 char buf[100];
 char *s;
@@ -53,7 +56,7 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 
 
 {whitespace}				;
-"void"                          {showToken("VOID"); return VOID;}
+"void"                          {showToken("VOID"); yylval.name = "asdasda"; return VOID;}
 "int"                          {showToken("INT");      return INT;}
 "byte"                         {showToken("BYTE"); return BYTE;}
 "b"                            {showToken("B"); return B;}
@@ -99,13 +102,14 @@ null                       {    showToken("NULL");      return NULL;}
 
 %%
 
-void showToken(char * name)
+void showToken(std::string name)
 {
-        printf("%d %s %s\n", yylineno, name, yytext);
+    cout << yylineno << " " << name << " " << yytext << endl;
 }
 
-void printEscapeErr(char * name){
-    printf("Error %s %s\n",name, yytext+1);
+void printEscapeErr(std::string name)
+{
+    cout << "Error " << name << " " << yytext+1 << endl;
     exit(0);
 }
 
