@@ -4,6 +4,7 @@
 #include <map>
 #include <list>
 #include <stack>
+#include <iostream>
 using namespace std;
 
 typedef enum{BOOL, INT, STRING} varType;
@@ -18,15 +19,17 @@ class Table {
 private:
 	int _tableId;
 	map<string, VarData> _vars;
-	Table& _parentTable;
+	Table* _parentTable;
+protected:
 	list<scopeType> scopeList;
+	scopeType _scopeType;
 
 public: 
-	Table(Table& parentTable, scopeType scopeType);
-	VarData get(string varName);
+	Table(){};
+	Table(Table* parentTable, scopeType scopeType){};
+	//VarData get(string varName){};
 	bool addVar(string name, VarData d);
 	bool contains(string name);
-
 
 };
 
@@ -37,7 +40,6 @@ public:
 	void push(bool isFunc);
 	void pop();
 	int& top();
-
 };
 
 class Tables{
@@ -57,7 +59,7 @@ private:
 	Offsets _ofstes;
 public:
 	bool EndProg(); //just pop tables and offsets
-	bool AddFunc();
+	bool AddFunc(string name, varType t);
 	bool OpenScope();//make new table, add to tables and update offsets
 	bool AddVar(string name, varType t); //insert at top table (name, tyoe, offset), and update offset
 	bool GetVar(string name, VarData& outData); //return a reference to the object, or null and false otherwise
