@@ -134,6 +134,7 @@ null                       {    showToken("NULL");      return NULL;}
                                 showToken("NUM");
                                 yylval.numVal = atoi(yytext);
                                 yylval.type = _INT;
+                                cout << yylval.type << ", " << yylval.numVal << endl;
                                 return NUM;
                            }
 

@@ -1,5 +1,6 @@
 %{
 	#include "contracts.hpp"
+	#include "output.hpp"
 	#include <iostream>
 	#include <stdlib.h>
 
@@ -7,6 +8,7 @@
 
 	extern int yylex();
 	int yyerror(char * message);
+	extern int yylineno;
 %}
 
 %token VOID INT BYTE B BOOL TRUE FALSE RETURN IF WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN LBRACE RBRACE ID NUM STRING
@@ -22,6 +24,8 @@
 %right NOT
 
 %%
+Test : Statement {$$.type = $1.type;}
+    ;
 
 Program	: Funcs
 	;
@@ -50,10 +54,10 @@ Statements : Statement | Statements Statement
 Statement : LBRACE Statements RBRACE |
             Type ID SC |
             Type ID ASSIGN Exp SC |
-            ID ASSIGN Exp SC |
+            ID ASSIGN Exp SC {$$.type = $3.type;} |
             Call SC |
             RETURN SC |
-            RETURN Exp SC |
+            RETURN Exp SC {$$.type = $1.type;} |
             IF LPAREN Exp RPAREN Statement |
             IF LPAREN Exp RPAREN Statement ELSE Statement |
             WHILE LPAREN Exp RPAREN Statement |
@@ -71,25 +75,31 @@ CaseStat : CASE NUM COLON Statement BREAK SC |
 Call : ID LPAREN ExpList RPAREN | ID LPAREN RPAREN
     ;
 
-ExpList : Exp | Exp COMMA ExpList
+ExpList : Exp {$$.type = $1.type;} |
+          Exp COMMA ExpList
     ;
 
 Type : INT | BYTE | BOOL
     ;
 
-Exp : LPAREN Exp RPAREN |
+Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       Exp BINOP Exp |
-      ID |
-      Call |
-      NUM {$$.type = $1.type;}|
-      NUM B |
-      STRING |
-      TRUE |
-      FALSE |
-      NOT Exp |
-      Exp AND Exp |
-      Exp OR Exp |
-      Exp RELOP Exp
+      ID {$$.type = $1.type;} |
+      Call {$$.type = $1.type;} |
+      NUM {$$.type = $1.type;} |
+      NUM B {$$.type = $1.type;} |
+      STRING {$$.type = $1.type;} |
+      TRUE {$$.type = $1.type;} |
+      FALSE {$$.type = $1.type;} |
+      NOT Exp {$$.type = $1.type;} |
+      Exp AND Exp
+      {
+            if($1.type != _BOOL || $1.type != $2.type)
+                output::errorMismatch(yylineno);
+            {$$.type = $1.type;}
+      } |
+      Exp OR Exp {$$.type = $1.type;} |
+      Exp RELOP Exp {$$.type = $1.type;}
     ;
 %%
 
