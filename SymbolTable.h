@@ -4,8 +4,10 @@
 #include <map>
 #include <list>
 #include <stack>
+#include <iostream>
 #include "contracts.hpp"
 using namespace std;
+
 
 typedef struct {
 	varType t;
@@ -16,11 +18,22 @@ class Table {
 private:
 	int _tableId;
 	map<string, VarData> _vars;
-	Table& _parentTable;
+	Table* _parentTable;
 	list<scopeType> scopeList;
 
 public: 
-	Table(Table& parentTable, scopeType scopeType);
+	Table(){
+		_tableId = 0;
+		_vars = map<string, VarData>();
+		_parentTable = NULL;
+		scopeList = list<scopeType>();
+	};
+	Table(Table* parentTable, scopeType newScopeType){
+		_tableId = 0;
+		_vars = map<string, VarData>();
+		_parentTable = NULL ;
+		scopeList = list<scopeType>();
+	};
 	VarData get(string varName);
 	bool addVar(string name, VarData d);
 	bool contains(string name);
@@ -55,7 +68,7 @@ private:
 	Offsets _ofstes;
 public:
 	bool EndProg(); //just pop tables and offsets
-	bool AddFunc();
+	bool AddFunc(string name, varType t);
 	bool OpenScope();//make new table, add to tables and update offsets
 	bool AddVar(string name, varType t); //insert at top table (name, tyoe, offset), and update offset
 	bool GetVar(string name, VarData& outData); //return a reference to the object, or null and false otherwise
