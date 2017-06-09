@@ -1,7 +1,7 @@
 %{
 
 /* Declarations section */
-
+#define DEBUG 0
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -56,16 +56,47 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 
 
 {whitespace}				;
-"void"                          {showToken("VOID"); yylval.name = "asdasda"; return VOID;}
-"int"                          {showToken("INT");      return INT;}
-"byte"                         {showToken("BYTE"); return BYTE;}
+"void"                         {
+                                    showToken("VOID");
+                                    yylval.type = _VOID;
+                                    return VOID;
+                               }
+"int"                          {
+                                    showToken("INT");
+                                    yylval.type = _INT;
+                                    return INT;
+                               }
+
+"byte"                         {
+                                    showToken("BYTE");
+                                    yylval.type = _BYTE;
+                                    return BYTE;
+                               }
 "b"                            {showToken("B"); return B;}
-"bool"                         {showToken("BOOL"); return BOOL;}
+
+"bool"                         {
+                                    showToken("BOOL");
+                                    yylval.type = _BOOL;
+                                    return BOOL;
+                               }
+
 "and"                          {showToken("AND"); return AND;}
 "or"                           {showToken("OR"); return OR;}
 "not"                          {showToken("NOT");        return NOT;} 
-"true"                         {showToken("TRUE");   return TRUE;}
-"false"                        {showToken("FALSE");   return FALSE;}
+"true"                         {
+                                    showToken("TRUE");
+                                    yylval.boolVal = _TRUE;
+                                    yylval.type = _BOOL;
+                                    return TRUE;
+                               }
+
+"false"                        {
+                                    showToken("FALSE");
+                                    yylval.boolVal = _FALSE;
+                                    yylval.type = _BOOL;
+                                    return FALSE;
+                               }
+
 "return"                       {showToken("RETURN");   return RETURN;}
 "if"                           {showToken("IF");   return IF;}
 "else"                     { showToken("ELSE");       return ELSE;}    
@@ -92,10 +123,33 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 [*]                        {    showToken("BINOP");     return  BINOP;}
 [/]                        {    showToken("BINOP");     return  BINOP;}
 null                       {    showToken("NULL");      return NULL;}
-"0"                        {    showToken("NUM");       return NUM;}
-[1-9][0-9]*                {    showToken("NUM");       return NUM;}
-[a-zA-Z][a-zA-Z0-9]*       {    showToken("ID");        return ID;}
-\"([^\n\r\"\\]|\\[rnt"\\])+\"  { showToken("STRING");       return STRING;}
+"0"                        {
+                                showToken("NUM");
+                                yylval.numVal = atoi(yytext);
+                                yylval.type = _INT;
+                                return NUM;
+                           }
+
+[1-9][0-9]*                {
+                                showToken("NUM");
+                                yylval.numVal = atoi(yytext);
+                                yylval.type = _INT;
+                                return NUM;
+                           }
+
+[a-zA-Z][a-zA-Z0-9]*       {
+                                showToken("ID");
+                                yylval.varName =  yylval.stringVal = yytext;
+                                yylval.type = _STRING;
+                                return ID;
+                           }
+
+\"([^\n\r\"\\]|\\[rnt"\\])+\"  {
+                                    showToken("STRING");
+                                    yylval.stringVal = yytext;
+                                    yylval.type = _STRING;
+                                    return STRING;
+                               }
 
 <<EOF>>		{showToken("EOF"); exit(1);}
 .		            printErr();
@@ -104,7 +158,9 @@ null                       {    showToken("NULL");      return NULL;}
 
 void showToken(std::string name)
 {
-    cout << yylineno << " " << name << " " << yytext << endl;
+    #if DEBUG > 0
+        cout << yylineno << " " << name << " " << yytext << endl;
+    #endif
 }
 
 void printEscapeErr(std::string name)

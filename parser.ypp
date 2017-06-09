@@ -29,7 +29,7 @@ Program	: Funcs
 Funcs : FuncDecl Funcs | /*epsilon*/
 	;
 
-FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE {std::cout << $1.name << endl;}
+FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE
     ;
 
 RetType : Type | VOID
@@ -81,7 +81,7 @@ Exp : LPAREN Exp RPAREN |
       Exp BINOP Exp |
       ID |
       Call |
-      NUM |
+      NUM {$$.type = $1.type;}|
       NUM B |
       STRING |
       TRUE |
