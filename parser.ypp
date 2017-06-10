@@ -68,14 +68,14 @@ Statement : LBRACE Statements RBRACE |
             {
                 if(isByte($1) && $3.numVal > MAXBYTE)
                 {
-                    output::errorByteTooLarge(yylineno,$3.numVal);
+                    output::errorByteTooLarge(yylineno,toString($3.numVal));
                     exit(0);
                 }
                 if($1.type == $3.type || ($1.type == _INT && $3.type == _BYTE))
                     $$ = $1 = $3;
                 else
                 {
-                    output::errorMisMatch(yylineno);
+                    output::errorMismatch(yylineno);
                     exit(0);
                 }
             } |
@@ -99,9 +99,10 @@ CaseStat : CASE NUM COLON Statement BREAK SC |
 Call : ID LPAREN ExpList RPAREN
         {
             //TODO: convert to symbol table func
+            vector<const char*> names;
             if(true)
             {
-                output::errorPrototypeMismatch(yylineno,$1.varName,$1.func.args);
+                output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),names);
                 exit(0);
             }
             $$.type = $1.type;
@@ -115,11 +116,11 @@ Call : ID LPAREN ExpList RPAREN
 ExpList : Exp
           {
             $$.type = $1.type;
-            $$.expTypes.insert($1.type);
+            $$.expTypes.push_back($1.type);
           } |
           Exp COMMA ExpList
           {
-            $$.expTypes.insert($1.type);
+            $$.expTypes.push_back($1.type);
           }
     ;
 
@@ -129,16 +130,16 @@ Type : INT {$$.type = _INT;} | BYTE {$$.type = _BYTE;} | BOOL {$$.type = _BOOL;}
 Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       ID {$$.type = $1.type;} |
       Call {$$.type = $1.type;} |
-      NUM {$$.type = $1._INT; $$.numVal = $1.numVal;} |
-      NUM B {$$.type = $1._BYTE; $$.numVal = $1.numVal;} |
-      STRING {$$.type = $1.type; $$.stringVal = $1.stringVal;} |
-      TRUE {$$.type = $1.type; $$.boolVal = $1.boolVal;} |
-      FALSE {$$.type = $1.type; $$.boolVal = $1.boolVal;} |
+      NUM {$$.type = _INT; $$.numVal = $1.numVal;} |
+      NUM B {$$.type = _BYTE; $$.numVal = $1.numVal;} |
+      STRING {$$.type = _STRING; $$.stringVal = $1.stringVal;} |
+      TRUE {$$.type = _BOOL; $$.boolVal = $1.boolVal;} |
+      FALSE {$$.type = _BOOL; $$.boolVal = $1.boolVal;} |
       NOT Exp
       {
-            if(!isBoolean($1)
+            if(!isBoolean($1))
             {
-                output::errorMisMatch(yylineno);
+                output::errorMismatch(yylineno);
                 exit(0);
             }
             $$.type = $1.type;
@@ -148,7 +149,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       {
             if(!isBoolean($1) || !areEqualTypes($1,$3))
             {
-                output::errorMismatch(yylineno);
+                //output::errorMismatch(yylineno);
                 exit(0);
             }
             $$.type = $1.type;
@@ -168,7 +169,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       {
             if(!isNumeric($1) || !areEqualTypes($1,$3))
             {
-                output::errorMisMatch(yylineno);
+                output::errorMismatch(yylineno);
                 exit(0);
             }
             $$.type = _BOOL;
@@ -177,7 +178,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       {
             if(!isNumeric($1) || !isNumeric($3))
             {
-                output::errorMisMatch(yylineno);
+                output::errorMismatch(yylineno);
                 exit(0);
             }
             $$.type = ($1.type == _BYTE) ? $3.type : $1.type;

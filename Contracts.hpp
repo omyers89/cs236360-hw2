@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <map>
 
@@ -33,5 +35,7 @@ typedef struct varData{
 
 
 #define YYSTYPE STYPE
+#define MAXBYTE 256
+#define MAXINTLENGTH 11
 
 #endif
