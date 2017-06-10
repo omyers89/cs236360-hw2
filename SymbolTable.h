@@ -19,18 +19,19 @@ struct IdType{
 
 
 typedef struct {
-	varType t;
+	IdType t;
 	int offset;
 } VarData;
 
 class Table {
 private:
 	map<string, VarData>* _vars;
-	Table* _parentTable;
+	
 	list<scopeType>* scopeList;
 public: 
+	Table* _parentTable;
 	Table(Table* parentTable, scopeType newScopeType = _IF);
-	VarData get(string varName);
+	bool get(string varName, VarData& dat);
 	bool addVar(string name, VarData d);
 	bool contains(string name);
 	~Table();
@@ -48,11 +49,12 @@ public:
 
 class Tables{
 private:
-	list<Table> _tableStack;
+	list<Table*> _tableStack;
 public:
-	void push(Table t);
+	void push(Table* t);
 	bool pop();
-	Table& get(int i);
+	Table* top();
+	Table* get(int i);
 };
 
 
@@ -61,10 +63,11 @@ private:
 	Tables _tables;
 	Offsets _offsetes;
 	bool findVarByName(string name);
+	bool GetFunc(string name, IdType &funType);
 public:
 	bool EndProg(); //just pop tables and offsets
 	SymbolTableResult AddFunc(string name, varType retType, vector<varType> &args);
-	SymbolTableResult CallFunc(string name, varType retType, vector<varType> &args);
+	SymbolTableResult CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret);
 	bool OpenScope();//make new table, add to tables and update offsets
 	bool AddVar(string name, varType t); //insert at top table (name, tyoe, offset), and update offset
 	bool GetVar(string name, varType& outVarType); //return a reference to the object, or null and false otherwise
