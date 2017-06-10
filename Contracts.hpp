@@ -3,14 +3,15 @@
 
 #include <string>
 #include <vector>
+#include <map>
 using namespace std;
 
 typedef enum{_BOOL, _INT, _BYTE, _STRING, _VOID} varType;
 typedef enum{_FUNC, _IF, _WHILE, _CASE} scopeType;
 
-typedef struct funcType{
-    retType;
-    map<varType,string> args;
+struct funcType{
+	varType retType;
+    vector<varType> args;
 };
 
 typedef vector<varType> expList;
