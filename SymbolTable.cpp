@@ -132,11 +132,11 @@ SymbolTableResult SymbolTable::AddFunc(string name, varType newRetType, vector<v
 bool CompareVecs(vector<varType> &callArgs, vector<varType> &expectedArgs){
 	vector<varType>::iterator it_c = callArgs.begin();
 	vector<varType>::iterator it_e = expectedArgs.begin();
-	while (it_c != callArgs.end && it_e != expectedArgs.end)
+	while (it_c != callArgs.end() && it_e != expectedArgs.end())
 	{
 		if (*it_c != *it_e){ return false; }
 	}
-	if (it_c == callArgs.end && it_e == expectedArgs.end){
+	if (it_c == callArgs.end() && it_e == expectedArgs.end()){
 		return true;
 	}
 	
@@ -176,9 +176,10 @@ bool SymbolTable::GetFunc(string name, IdType &funType){
 
 
 bool SymbolTable::OpenScope(){
-	Table* nt = new Table(_tables.top);
+	Table* nt = new Table(_tables.top());
 	_tables.push(nt);
 	_offsetes.push(false);
+	return true;
 }
 
 bool SymbolTable::AddVar(string name, varType t){

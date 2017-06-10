@@ -42,15 +42,13 @@ Funcs : FuncDecl Funcs
 
 FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE M Statements RBRACE
            {
-                funcType fType;
-                fType.retType = $1.type;
-                fType.args = $4.formalTypes;
-                SymbolTableResult res = symbolTable->AddFunc($2.varName,fType);
+                SymbolTableResult res = symbolTable->AddFunc($2.varName,$1.type,$4.formalTypes);
                 if(res == FAIL)
                 {
                     output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
+                symbolTable->EndProg();
            }
     ;
 
@@ -83,28 +81,45 @@ FormalDecl : Type ID
 Statements : Statement {$$.type = $1.type;} | Statements Statement {$$.type = $2.type;}
     ;
 
-Statement : LBRACE Statements RBRACE |
+Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
             Type ID SC
             {
-
-                if(!symbolTable->GetVar($2.varName,$1.type))
+                if(!symbolTable->AddVar($2.varName,$1.type))
                 {
                     output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
-            }
-            Type ID ASSIGN Exp SC |
-            ID ASSIGN Exp SC
+            } |
+            Type ID ASSIGN Exp SC
             {
-                if(isByte($1) && $3.numVal > MAXBYTE)
+                if(!symbolTable->AddVar($2.varName,$1.type))
                 {
-                    char* str = toString($3.numVal);
-                    output::errorByteTooLarge(yylineno,str);
-                    free(str);
+                    output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
-                if($1.type == $3.type || ($1.type == _INT && $3.type == _BYTE))
-                    $$ = $1 = $3;
+                if(!areEqualTypes($1,$4));
+                {
+                    output::errorMismatch(yylineno);
+                    exit(0);
+                }
+            } |
+            ID ASSIGN Exp SC
+            {
+                varType t;
+                if(!symbolTable->GetVar($1.varName,t))
+                {
+                    output::errorUndef(yylineno,$1.varName.c_str());
+                    exit(0);
+                }
+                if(isByte(t) && isNumeric($3) && $3.numVal > MAXBYTE)
+                {
+                    char* str = toString($3.numVal); //TODO: try to find a better inToString
+                    output::errorByteTooLarge(yylineno,str);
+                    free(str); //TODO: i'm crying
+                    exit(0);
+                }
+                if(t == $3.type || (t == _INT && $3.type == _BYTE))
+                    $$.type = t;
                 else
                 {
                     output::errorMismatch(yylineno);
@@ -130,16 +145,52 @@ CaseStat : CASE NUM COLON Statement BREAK SC |
 
 Call : ID LPAREN ExpList RPAREN
         {
-            funcType fType;
-            fType.retType = $1.type;
-            fType.args = $3.expTypes;
-            SymbolTableResult res = symbolTable->CallFunc($1.varName,fType);
+            if($1.varName == LIBPRINT)
+            {
+                if(!($3.expTypes.size() == 1) || !($3.type == _STRING))
+                {
+                    std::vector<const char*> stringVec = {"string"};
+                    output::errorPrototypeMismatch(yylineno,LIBPRINT,stringVec);
+                    exit(0);
+                }
+                $$.type = _VOID;
+            }
+            else if($1.varName == LIBPRINTI)
+            {
+                if(!($3.expTypes.size() == 1) || !isNumeric($3))
+                {
+                    std::vector<const char*> intVec = {"int"};
+                    output::errorPrototypeMismatch(yylineno,LIBPRINT,intVec);
+                    exit(0);
+                }
+                $$.type = _VOID;
+            }
+            else
+            {
+                vector<varType> expected;
+                varType retType;
+                SymbolTableResult res = symbolTable->CallFunc($1.varName,$3.expTypes,retType,expected);
+                if(res == PROTOTYPE_MISMATCH)
+                {
+                    output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),getTypeNames(expected));
+                    exit(0);
+                }
+                if(res == NOT_DEFINED)
+                {
+                    output::errorUndef(yylineno,$1.varName.c_str());
+                    exit(0);
+                }
+                $$.type = retType;
+            }
+        } |
+        ID LPAREN RPAREN
+        {
+            vector<varType> voidVec;
+            vector<varType> expected;
+            SymbolTableResult res = symbolTable->CallFunc($1.varName,voidVec,expected);
             if(res == PROTOTYPE_MISMATCH)
             {
-
-                char * names;
-                output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),names);
-
+                output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),getTypeNames(expected));
                 exit(0);
             }
             if(res == NOT_DEFINED)
@@ -147,10 +198,6 @@ Call : ID LPAREN ExpList RPAREN
                 output::errorUndef(yylineno,$1.varName.c_str());
                 exit(0);
             }
-            $$.type = $1.type;
-        } |
-        ID LPAREN RPAREN
-        {
             $$.type = $1.type;
         }
     ;

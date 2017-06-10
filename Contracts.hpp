@@ -32,5 +32,7 @@ typedef struct {
 #define YYSTYPE STYPE
 #define MAXBYTE 256
 #define MAXINTLENGTH 11
+#define LIBPRINT "print"
+#define LIBPRINTI "printi"
 
 #endif
