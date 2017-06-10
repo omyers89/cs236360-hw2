@@ -4,8 +4,8 @@
 
 #include "Utils.hpp"
 
-bool isByte(STYPE a){
-    return a.type == _BYTE;
+bool isByte(varType a){
+    return a == _BYTE;
 }
 
 bool isInt(STYPE a){
@@ -25,7 +25,7 @@ bool areEqualTypes(STYPE a,STYPE b){
 }
 
 bool isNumeric(STYPE a){
-    return isInt(a) || isByte(a);
+    return isInt(a) || isByte(a.type);
 }
 
 char * toString(int num){
@@ -34,9 +34,9 @@ char * toString(int num){
     return buffer;
 }
 
-std::vector<char*> getTypeNames(std::vector<varType> vec){
-    std::vector<char*> ret;
-    for(int i=0;i<v.size();++i)
+std::vector<const char*> getTypeNames(std::vector<varType> vec){
+    std::vector<const char*> ret;
+    for(int i=0;i<vec.size();++i)
     {
         switch(vec[i])
         {

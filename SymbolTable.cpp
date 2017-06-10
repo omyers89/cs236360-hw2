@@ -100,7 +100,7 @@ SymbolTableResult SymbolTable::AddFunc(string name, varType retType, vector<varT
 
 }
 
-SymbolTableResult SymbolTable::CallFunc(string name, varType retType, vector<varType> &args){
+SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &args){
 	cout << "in CallFunc:" << endl;
 	return SUCCESS;
 }

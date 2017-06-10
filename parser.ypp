@@ -42,10 +42,7 @@ Funcs : FuncDecl Funcs
 
 FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE M Statements RBRACE
            {
-                funcType fType;
-                fType.retType = $1.type;
-                fType.args = $4.formalTypes;
-                SymbolTableResult res = symbolTable->AddFunc($2.varName,fType);
+                SymbolTableResult res = symbolTable->AddFunc($2.varName,$1.type,$4.formalTypes);
                 if(res == FAIL)
                 {
                     output::errorDef(yylineno,$2.varName.c_str());
@@ -100,7 +97,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
-                if(!areEqualTypes($1.type,$4.type);
+                if(!areEqualTypes($1,$4));
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -114,15 +111,15 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     output::errorUndef(yylineno,$1.varName.c_str());
                     exit(0);
                 }
-                if(isByte(t.type) && isNumeric($3.type) && $3.numVal > MAXBYTE)
+                if(isByte(t) && isNumeric($3) && $3.numVal > MAXBYTE)
                 {
                     char* str = toString($3.numVal); //TODO: try to find a better inToString
                     output::errorByteTooLarge(yylineno,str);
                     free(str); //TODO: i'm crying
                     exit(0);
                 }
-                if(t.type == $3.type || (t.type == _INT && $3.type == _BYTE))
-                    $$.type = t.type;
+                if(t == $3.type || (t == _INT && $3.type == _BYTE))
+                    $$.type = t;
                 else
                 {
                     output::errorMismatch(yylineno);
