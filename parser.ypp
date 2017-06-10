@@ -154,8 +154,10 @@ Call : ID LPAREN ExpList RPAREN
             SymbolTableResult res = symbolTable->CallFunc($1.varName,fType);
             if(res == PROTOTYPE_MISMATCH)
             {
+
                 char * names;
                 output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),names);
+
                 exit(0);
             }
             if(res == NOT_DEFINED)
