@@ -1,10 +1,10 @@
 
 #include "SymbolTable.h"
+#include <exception>
 
 using namespace std;
 
-Table::Table(Table* parentTable, scopeType newScopeType):
-															_parentTable(parentTable)
+Table::Table(Table* parentTable, scopeType newScopeType): _parentTable(parentTable)
 {
 	_vars = new(map<string, VarData>);
 	scopeList = new (list<scopeType>);
@@ -53,7 +53,7 @@ bool Offsets::pop(){
 
 int& Offsets::top(){
 	if (_offsetsStack.size() == 0){
-		throw new exception("trying to top empty stack");
+		throw exception::exception();
 	}
 	return _offsetsStack.top();
 }
@@ -73,7 +73,7 @@ bool Tables::pop(){
 
 Table& Tables::get(int i){
 	if (_tableStack.size() >= (unsigned)i){
-		throw new exception("invalid index- get tables");
+		throw exception::exception();
 	}
 	list<Table>::iterator it;
 	advance(it, i);
@@ -86,12 +86,21 @@ bool SymbolTable::EndProg(){
 }
 
 
-SymbolTableResult SymbolTable::AddFunc(string name, funcType t){
-	cout << "in AddFunc:" << endl;
-	return SUCCESS;
+
+bool SymbolTable::findVarByName(string name){
+
+	return true;
 }
 
-SymbolTableResult SymbolTable::CallFunc(string name, funcType ftStruct){
+SymbolTableResult SymbolTable::AddFunc(string name, varType retType, vector<varType> &args){
+	if (! findVarByName(name)){
+		return FAIL;
+	}
+
+
+}
+
+SymbolTableResult SymbolTable::CallFunc(string name, varType retType, vector<varType> &args){
 	cout << "in CallFunc:" << endl;
 	return SUCCESS;
 }
@@ -100,14 +109,14 @@ SymbolTableResult SymbolTable::CallFunc(string name, funcType ftStruct){
 
 	bool SymbolTable::OpenScope(){
 		cout << "in OpenScope:" << endl;
-		return SUCCESS;
+		return true;
 	}
 
 	bool SymbolTable::AddVar(string name, varType t){
 		cout << "in AddVar:" << endl;
 		return true;
 	}
-	bool SymbolTable::GetVar(string name, VarData& outData){
+	bool SymbolTable::GetVar(string name, varType& outVarType){
 		cout << "in GetVar:" << endl;
 		return true;
 	}

@@ -10,6 +10,14 @@ using namespace std;
 
 typedef enum{ SUCCESS,FAIL, NOT_DEFINED, PROTOTYPE_MISMATCH} SymbolTableResult;
 
+
+struct IdType{
+	varType retType;
+	vector<varType> args;
+};
+
+
+
 typedef struct {
 	varType t;
 	int offset;
@@ -52,14 +60,15 @@ class SymbolTable{
 private:
 	Tables _tables;
 	Offsets _offsetes;
+	bool findVarByName(string name);
 public:
 	bool EndProg(); //just pop tables and offsets
-	SymbolTableResult AddFunc(string name, funcType ftStruct);
-	SymbolTableResult CallFunc(string name, funcType ftStruct);
+	SymbolTableResult AddFunc(string name, varType retType, vector<varType> &args);
+	SymbolTableResult CallFunc(string name, varType retType, vector<varType> &args);
 	bool OpenScope();//make new table, add to tables and update offsets
 	bool AddVar(string name, varType t); //insert at top table (name, tyoe, offset), and update offset
-	bool GetVar(string name, VarData& outData); //return a reference to the object, or null and false otherwise
+	bool GetVar(string name, varType& outVarType); //return a reference to the object, or null and false otherwise
 	bool UpdateVar(string name, VarData newData);
 };
 
-#endif _TABLES_H_
+#endif //_TABLES_H_
