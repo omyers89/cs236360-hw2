@@ -8,6 +8,8 @@
 #include "Contracts.hpp"
 using namespace std;
 
+typedef enum{ AF_SUCCESS, AF_NOT_DEFINED, AF_PROTOTYPE_MISMATCH} AddFuncResult;
+
 typedef struct {
 	varType t;
 	int offset;
@@ -16,28 +18,15 @@ typedef struct {
 class Table {
 private:
 	int _tableId;
-	map<string, VarData> _vars;
+	map<string, VarData>* _vars;
 	Table* _parentTable;
-	list<scopeType> scopeList;
-
+	list<scopeType>* scopeList;
 public: 
-	Table(){
-		_tableId = 0;
-		_vars = map<string, VarData>();
-		_parentTable = NULL;
-		scopeList = list<scopeType>();
-	};
-	Table(Table* parentTable, scopeType newScopeType){
-		_tableId = 0;
-		_vars = map<string, VarData>();
-		_parentTable = NULL ;
-		scopeList = list<scopeType>();
-	};
+	Table(Table* parentTable, int tableId, scopeType newScopeType = _IF);
 	VarData get(string varName);
 	bool addVar(string name, VarData d);
 	bool contains(string name);
-
-
+	~Table();
 };
 
 class Offsets{
@@ -51,6 +40,7 @@ public:
 };
 
 class Tables{
+	static int TID;
 private:
 	list<Table> _tableStack;
 
@@ -67,7 +57,7 @@ private:
 	Offsets _ofstes;
 public:
 	bool EndProg(); //just pop tables and offsets
-	bool AddFunc(string name, varType t);
+	AddFuncResult AddFunc(string name, funcType ftStruct);
 	bool OpenScope();//make new table, add to tables and update offsets
 	bool AddVar(string name, varType t); //insert at top table (name, tyoe, offset), and update offset
 	bool GetVar(string name, VarData& outData); //return a reference to the object, or null and false otherwise
