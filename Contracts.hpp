@@ -8,8 +8,6 @@
 
 #include <map>
 
-
-
 using namespace std;
 
 typedef enum{_BOOL, _INT, _BYTE, _STRING, _VOID} varType;
@@ -21,7 +19,7 @@ struct funcType{
     vector<varType> args;
 };
 
-typedef vector<varType> expList;
+typedef vector<varType> varList;
 
 typedef struct varData{
     int numVal;
@@ -30,7 +28,8 @@ typedef struct varData{
     string varName;
     varType type;
     funcType func;
-    expList expTypes;
+    varList expTypes;
+    varList formalTypes;
 }STYPE;
 
 

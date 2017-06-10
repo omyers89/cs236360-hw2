@@ -42,7 +42,16 @@ Funcs : FuncDecl Funcs
 
 FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE
            {
-                symbolTable->AddFunc($2.varName,$1.type);
+                funcType fType;
+                fType.retType = $1.type;
+                fType.args = $4.formalTypes;
+                SymbolTableResult res = symbolTable->AddFunc($2.varName,fType);
+                if(res == FAIL)
+                {
+                    output::errorDef(yylineno,$2.varName.c_str());
+                    exit(0);
+                }
+
            }
     ;
 
@@ -56,6 +65,9 @@ FormalsList : FormalDecl | FormalDecl COMMA FormalsList
     ;
 
 FormalDecl : Type ID
+             {
+                $$.formalTypes.push_back($1.type);
+             }
     ;
 
 Statements : Statement | Statements Statement {$$.type = $2.type;}
@@ -68,7 +80,9 @@ Statement : LBRACE Statements RBRACE |
             {
                 if(isByte($1) && $3.numVal > MAXBYTE)
                 {
-                    output::errorByteTooLarge(yylineno,toString($3.numVal));
+                    char* str = toString($3.numVal)
+                    output::errorByteTooLarge(yylineno,str);
+                    free(str);
                     exit(0);
                 }
                 if($1.type == $3.type || ($1.type == _INT && $3.type == _BYTE))
@@ -98,11 +112,18 @@ CaseStat : CASE NUM COLON Statement BREAK SC |
 
 Call : ID LPAREN ExpList RPAREN
         {
-            //TODO: convert to symbol table func
-            vector<const char*> names;
-            if(true)
+            funcType fType;
+            fType.retType = $1.type;
+            fType.args = $3.expTypes;
+            SymbolTableResult res = symbolTable->CallFunc($1.varName,fType);
+            if(res == PROTOTYPE_MISMATCH)
             {
                 output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),names);
+                exit(0);
+            }
+            if(res == NOT_DEFINED)
+            {
+                output::errorUndef(yylineno,$1.varName.c_str());
                 exit(0);
             }
             $$.type = $1.type;
@@ -128,7 +149,11 @@ Type : INT {$$.type = _INT;} | BYTE {$$.type = _BYTE;} | BOOL {$$.type = _BOOL;}
     ;
 
 Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
-      ID {$$.type = $1.type;} |
+      ID
+      {
+        $$.type = $1.type;
+        $$.varName = $1.varName;
+      } |
       Call {$$.type = $1.type;} |
       NUM {$$.type = _INT; $$.numVal = $1.numVal;} |
       NUM B {$$.type = _BYTE; $$.numVal = $1.numVal;} |
