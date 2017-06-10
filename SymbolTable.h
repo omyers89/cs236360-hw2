@@ -8,7 +8,6 @@
 #include "Contracts.hpp"
 using namespace std;
 
-
 typedef enum{ AF_SUCCESS, AF_NOT_DEFINED, AF_PROTOTYPE_MISMATCH} AddFuncResult;
 
 typedef struct {

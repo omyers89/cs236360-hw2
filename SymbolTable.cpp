@@ -3,43 +3,61 @@
 
 using namespace std;
 
+Table::Table(Table* parentTable, int tableId, scopeType newScopeType):
+															_tableId(tableId),
+															_parentTable(parentTable)
+{
+	_vars = new(map<string, VarData>);
+	scopeList = new (list<scopeType>);
+}
+
+Table::~Table()
+{
+	delete(_vars);
+	delete(scopeList);
+}
+
 bool Table::addVar(string name, VarData d)
 {
-	cout << "in addVar:" << endl;
+	if (contains(name))
+	{
+		return false;
+	}
+	(*_vars)[name] = d;
 	return true;
+	
 }
-//{
-//	if (contains(name))
-//	{
-//		return false;
-//	}
-//	
-//}
 
 bool Table::contains(string name)
 {
-	cout << "in contains:" << endl;
-	return true;
+	return (_vars->find(name) != _vars->end());
 }
-//{
-//	return (_vars.find(name) != _vars.end());
-//}
 
 
-void Offsets::push(bool isFunc){
-		cout << "in push Offset:" << endl;
-		return;
+void Offsets::push(bool isFunc)
+{
+	int curOffset = _offsetsStack.top();
+	if (isFunc) {
+		curOffset = 0; //note: functions does not have offset.
 	}
-void Offsets::pop(){
-	cout << "in pop Offset:" << endl;
-	return;
-}
-int& Offsets::top(){
-	cout << "in top Offset:" << endl;
-	int i = 1;
-	return i;
+	_offsetsStack.push(curOffset);
 }
 
+void Offsets::pop(){
+	if (_offsetsStack.size() == 0){
+		throw new exception("trying to pop empty stack");
+	}
+	_offsetsStack.pop();
+}
+
+int& Offsets::top(){
+	if (_offsetsStack.size() == 0){
+		throw new exception("trying to top empty stack");
+	}
+	return _offsetsStack.top();
+}
+
+int Tables::TID = 0;
 void Tables::push(Table t){
 	cout << "in push Tables:" << endl;
 	return;
@@ -50,8 +68,7 @@ void Tables::pop(){
 }
 Table& Tables::get(int i){
 	cout << "in get Tables:" << endl;
-	Table table;
-	return table;
+	return Table(NULL,0);
 }
 
 
@@ -59,9 +76,9 @@ bool SymbolTable::EndProg(){
 	cout << "in EndProg:" << endl;
 	return true;
 }
-bool SymbolTable::AddFunc(string name, varType t){
+AddFuncResult SymbolTable::AddFunc(string name, funcType t){
 	cout << "in AddFunc:" << endl;
-	return true;
+	return AF_SUCCESS;
 }
 	bool SymbolTable::OpenScope(){
 		cout << "in OpenScope:" << endl;

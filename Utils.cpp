@@ -28,10 +28,3 @@ bool isNumeric(varData a){
     return isInt(a) || isByte(a);
 }
 
-template <typename TKey, typename TVal>
-std::vector<TVal> mapToVector(std::map<TKey,TVal> map){
-    vector<TVal> vec;
-    for(typename TVal::const_iterator it = map.begin(); it != map.end(); ++it )
-        vec.insert(it->second);
-    return vec;
-};

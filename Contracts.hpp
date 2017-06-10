@@ -3,14 +3,19 @@
 
 #include <string>
 #include <vector>
+
 #include <map>
+
+
+
 using namespace std;
 
 typedef enum{_BOOL, _INT, _BYTE, _STRING, _VOID} varType;
 typedef enum{_FUNC, _IF, _WHILE, _CASE} scopeType;
 
-struct funcType{
-	varType retType;
+
+typedef struct funcType{
+    varType retType;
     vector<varType> args;
 };
 
