@@ -40,7 +40,7 @@ Funcs : FuncDecl Funcs
         } | /*epsilon*/
 	;
 
-FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE
+FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE M Statements RBRACE
            {
                 funcType fType;
                 fType.retType = $1.type;
@@ -51,17 +51,27 @@ FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE Statements RBRACE
                     output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
-
            }
     ;
 
-RetType : Type | VOID
+RetType : Type {$$.type = $1.type;} | VOID { $$.type = _VOID;}
     ;
 
-Formals : FormalsList | /*epsilon*/
+Formals : FormalsList
+          {
+            $$.formalTypes.push_back($1.type);
+          } | /*epsilon*/
     ;
 
-FormalsList : FormalDecl | FormalDecl COMMA FormalsList
+FormalsList : FormalDecl
+              {
+                $$.formalTypes.push_back($1.type);
+              } |
+              FormalDecl COMMA FormalsList
+              {
+                $$.formalTypes.push_back($1.type);
+              }
+
     ;
 
 FormalDecl : Type ID
@@ -70,11 +80,19 @@ FormalDecl : Type ID
              }
     ;
 
-Statements : Statement | Statements Statement {$$.type = $2.type;}
+Statements : Statement {$$.type = $1.type;} | Statements Statement {$$.type = $2.type;}
     ;
 
 Statement : LBRACE Statements RBRACE |
-            Type ID SC |
+            Type ID SC
+            {
+
+                if(!symbolTable->GetVar($2.varName,$1.type))
+                {
+                    output::errorDef(yylineno,$2.varName.c_str());
+                    exit(0);
+                }
+            }
             Type ID ASSIGN Exp SC |
             ID ASSIGN Exp SC
             {
@@ -94,7 +112,7 @@ Statement : LBRACE Statements RBRACE |
                 }
             } |
             Call SC |
-            RETURN SC |
+            RETURN SC {$$.type = _VOID;} |
             RETURN Exp SC {$$.type = $1.type;} |
             IF LPAREN Exp RPAREN Statement |
             IF LPAREN Exp RPAREN Statement ELSE Statement |
@@ -118,7 +136,10 @@ Call : ID LPAREN ExpList RPAREN
             SymbolTableResult res = symbolTable->CallFunc($1.varName,fType);
             if(res == PROTOTYPE_MISMATCH)
             {
-                output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),std::vector<const char*>());
+
+                char * names;
+                output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),names);
+
                 exit(0);
             }
             if(res == NOT_DEFINED)
@@ -208,6 +229,9 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
             }
             $$.type = ($1.type == _BYTE) ? $3.type : $1.type;
       }
+    ;
+
+M : { symbolTable->OpenScope();}
     ;
 %%
 

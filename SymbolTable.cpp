@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Table::Table(Table* parentTable, scopeType newScopeType): _parentTable(parentTable)
+Table::Table(Table* parentTable, scopeType newScopeType) : _parentTable(parentTable)
 {
 	_vars = new(map<string, VarData>);
 	scopeList = new (list<scopeType>);
@@ -24,7 +24,7 @@ bool Table::addVar(string name, VarData d)
 	}
 	(*_vars)[name] = d;
 	return true;
-	
+
 }
 
 bool Table::contains(string name)
@@ -93,7 +93,7 @@ bool SymbolTable::findVarByName(string name){
 }
 
 SymbolTableResult SymbolTable::AddFunc(string name, varType retType, vector<varType> &args){
-	if (! findVarByName(name)){
+	if (!findVarByName(name)){
 		return FAIL;
 	}
 
@@ -107,20 +107,20 @@ SymbolTableResult SymbolTable::CallFunc(string name, varType retType, vector<var
 
 
 
-	bool SymbolTable::OpenScope(){
-		cout << "in OpenScope:" << endl;
-		return true;
-	}
+bool SymbolTable::OpenScope(){
+	cout << "in OpenScope:" << endl;
+	return true;
+}
 
-	bool SymbolTable::AddVar(string name, varType t){
-		cout << "in AddVar:" << endl;
-		return true;
-	}
-	bool SymbolTable::GetVar(string name, varType& outVarType){
-		cout << "in GetVar:" << endl;
-		return true;
-	}
-	bool SymbolTable::UpdateVar(string name, VarData newData){
-		cout << "in UpdateVar:" << endl;
-		return true;
-	}
+bool SymbolTable::AddVar(string name, varType t){
+	cout << "in AddVar:" << endl;
+	return true;
+}
+bool SymbolTable::GetVar(string name, varType& outVarType){
+	cout << "in GetVar:" << endl;
+	return true;
+}
+bool SymbolTable::UpdateVar(string name, VarData newData){
+	cout << "in UpdateVar:" << endl;
+	return true;
+}
