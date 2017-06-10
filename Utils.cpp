@@ -17,7 +17,7 @@ bool isBoolean(varData a){
 }
 
 bool isString(varData a){
-    return a.type = _STRING;
+	return a.type == _STRING;
 }
 
 bool areEqualTypes(varData a,varData b){
