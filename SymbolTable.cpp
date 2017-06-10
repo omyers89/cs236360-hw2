@@ -42,11 +42,13 @@ void Offsets::push(bool isFunc)
 	_offsetsStack.push(curOffset);
 }
 
-void Offsets::pop(){
+bool Offsets::pop(){
 	if (_offsetsStack.size() == 0){
-		throw new exception("trying to pop empty stack Offsets");
+		//throw new exception("trying to pop empty stack Offsets");
+		return false;
 	}
 	_offsetsStack.pop();
+	return true;
 }
 
 int& Offsets::top(){
@@ -60,12 +62,13 @@ void Tables::push(Table t){
 	_tableStack.push_front(t);
 }
 
-void Tables::pop(){
+bool Tables::pop(){
 	if (_tableStack.size() == 0){
-		throw new exception("trying to pop empty stack- Tables");
+		//throw new exception("trying to pop empty stack- Tables");
+		return false;
 	}
 	_tableStack.pop_front();
-
+	return true;
 }
 
 Table& Tables::get(int i){
@@ -79,9 +82,10 @@ Table& Tables::get(int i){
 
 
 bool SymbolTable::EndProg(){
-	cout << "in EndProg:" << endl;
-	return true;
+	return _tables.pop() && _offsetes.pop();
 }
+
+
 SymbolTableResult SymbolTable::AddFunc(string name, funcType t){
 	cout << "in AddFunc:" << endl;
 	return SUCCESS;

@@ -33,7 +33,7 @@ private:
 	stack<int> _offsetsStack;
 public:
 	void push(bool isFunc);
-	void pop();
+	bool pop();
 	int& top();
 
 };
@@ -43,7 +43,7 @@ private:
 	list<Table> _tableStack;
 public:
 	void push(Table t);
-	void pop();
+	bool pop();
 	Table& get(int i);
 };
 
@@ -51,7 +51,7 @@ public:
 class SymbolTable{
 private:
 	Tables _tables;
-	Offsets _ofstes;
+	Offsets _offsetes;
 public:
 	bool EndProg(); //just pop tables and offsets
 	SymbolTableResult AddFunc(string name, funcType ftStruct);

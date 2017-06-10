@@ -33,7 +33,3 @@ char * toString(int num){
     sprintf(buffer,"%d",num);
     return buffer;
 }
-
-char * toString(string str){
-
-}
