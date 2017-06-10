@@ -1,7 +1,9 @@
 
 #include "SymbolTable.h"
+#include <exception>
 
 using namespace std;
+using namespace std::exception;
 
 Table::Table(Table* parentTable, scopeType newScopeType):
 															_parentTable(parentTable)
@@ -42,13 +44,11 @@ void Offsets::push(bool isFunc)
 	_offsetsStack.push(curOffset);
 }
 
-bool Offsets::pop(){
+void Offsets::pop(){
 	if (_offsetsStack.size() == 0){
-		//throw new exception("trying to pop empty stack Offsets");
-		return false;
+		throw new exception("trying to pop empty stack Offsets");
 	}
 	_offsetsStack.pop();
-	return true;
 }
 
 int& Offsets::top(){
@@ -62,13 +62,12 @@ void Tables::push(Table t){
 	_tableStack.push_front(t);
 }
 
-bool Tables::pop(){
+void Tables::pop(){
 	if (_tableStack.size() == 0){
-		//throw new exception("trying to pop empty stack- Tables");
-		return false;
+		throw new exception("trying to pop empty stack- Tables");
 	}
 	_tableStack.pop_front();
-	return true;
+
 }
 
 Table& Tables::get(int i){
@@ -82,10 +81,9 @@ Table& Tables::get(int i){
 
 
 bool SymbolTable::EndProg(){
-	return _tables.pop() && _offsetes.pop();
+	cout << "in EndProg:" << endl;
+	return true;
 }
-
-
 SymbolTableResult SymbolTable::AddFunc(string name, funcType t){
 	cout << "in AddFunc:" << endl;
 	return SUCCESS;
@@ -107,7 +105,7 @@ SymbolTableResult SymbolTable::CallFunc(string name, funcType ftStruct){
 		cout << "in AddVar:" << endl;
 		return true;
 	}
-	bool SymbolTable::GetVar(string name, VarData& outData){
+	bool SymbolTable::GetVar(string name){
 		cout << "in GetVar:" << endl;
 		return true;
 	}

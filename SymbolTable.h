@@ -58,7 +58,7 @@ public:
 	SymbolTableResult CallFunc(string name, funcType ftStruct);
 	bool OpenScope();//make new table, add to tables and update offsets
 	bool AddVar(string name, varType t); //insert at top table (name, tyoe, offset), and update offset
-	bool GetVar(string name, VarData& outData); //return a reference to the object, or null and false otherwise
+	bool GetVar(string name); //return a reference to the object, or null and false otherwise
 	bool UpdateVar(string name, VarData newData);
 };
 
