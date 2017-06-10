@@ -148,16 +148,11 @@ CaseStat : CASE NUM COLON Statement BREAK SC |
 
 Call : ID LPAREN ExpList RPAREN
         {
-            funcType fType;
-            fType.retType = $1.type;
-            fType.args = $3.expTypes;
-            SymbolTableResult res = symbolTable->CallFunc($1.varName,fType);
+            vector<varType> args;
+            SymbolTableResult res = symbolTable->CallFunc($1.varName,args);
             if(res == PROTOTYPE_MISMATCH)
             {
-
-                char * names;
-                output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),names);
-
+                output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),getTypeNames(args));
                 exit(0);
             }
             if(res == NOT_DEFINED)
@@ -169,6 +164,18 @@ Call : ID LPAREN ExpList RPAREN
         } |
         ID LPAREN RPAREN
         {
+            vector<varType> args;
+            SymbolTableResult res = symbolTable->CallFunc($1.varName,args);
+            if(res == PROTOTYPE_MISMATCH)
+            {
+                output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),getTypeNames(args));
+                exit(0);
+            }
+            if(res == NOT_DEFINED)
+            {
+                output::errorUndef(yylineno,$1.varName.c_str());
+                exit(0);
+            }
             $$.type = $1.type;
         }
     ;

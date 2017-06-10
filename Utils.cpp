@@ -33,3 +33,24 @@ char * toString(int num){
     sprintf(buffer,"%d",num);
     return buffer;
 }
+
+std::vector<char*> getTypeNames(std::vector<varType> vec){
+    std::vector<char*> ret;
+    for(int i=0;i<v.size();++i)
+    {
+        switch(vec[i])
+        {
+            case (_BOOL): ret.push_back("bool");
+                break;
+            case (_INT): ret.push_back("int");
+                break;
+            case (_BYTE): ret.push_back("byte");
+                break;
+            case (_STRING): ret.push_back("string");
+                break;
+            case (_VOID): ret.push_back("void");
+                break;
+        }
+    }
+    return ret;
+}
