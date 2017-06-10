@@ -80,7 +80,7 @@ Statement : LBRACE Statements RBRACE |
             {
                 if(isByte($1) && $3.numVal > MAXBYTE)
                 {
-                    char* str = toString($3.numVal)
+                    char* str = toString($3.numVal);
                     output::errorByteTooLarge(yylineno,str);
                     free(str);
                     exit(0);
@@ -118,7 +118,7 @@ Call : ID LPAREN ExpList RPAREN
             SymbolTableResult res = symbolTable->CallFunc($1.varName,fType);
             if(res == PROTOTYPE_MISMATCH)
             {
-                output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),names);
+                output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),std::vector<const char*>());
                 exit(0);
             }
             if(res == NOT_DEFINED)
