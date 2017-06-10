@@ -6,7 +6,7 @@
 #include <string.h>
 #include <string>
 #include <iostream>
-#include "contracts.hpp"
+#include "Contracts.hpp"
 #include "parser.tab.hpp"
 void showToken(std::string name);
 void printErr();

@@ -1,5 +1,6 @@
 %{
-	#include "contracts.hpp"
+	#include "Contracts.hpp"
+	#include "Utils.hpp"
 	#include "output.hpp"
 	#include "SymbolTable.h"
 	#include <iostream>
@@ -63,7 +64,11 @@ Statements : Statement | Statements Statement {$$.type = $2.type;}
 Statement : LBRACE Statements RBRACE |
             Type ID SC |
             Type ID ASSIGN Exp SC |
-            ID ASSIGN Exp SC {$$.type = $3.type; cout << "type: " << $3.type << " val: " << $3.numVal << " boolVal: " << $3.boolVal << endl;} |
+            ID ASSIGN Exp SC
+            {
+                if($1.type == $3.type || ($1.type == _INT && $3.type == _BYTE))
+                    $$ = $1 = $3;
+            } |
             Call SC |
             RETURN SC |
             RETURN Exp SC {$$.type = $1.type;} |
@@ -81,26 +86,34 @@ CaseStat : CASE NUM COLON Statement BREAK SC |
            CASE NUM B COLON Statement BREAK SC
     ;
 
-Call : ID LPAREN ExpList RPAREN | ID LPAREN RPAREN
+Call : ID LPAREN ExpList RPAREN {$$.type = $1.type;} | ID LPAREN RPAREN {$$.type = $1.type;}
     ;
 
 ExpList : Exp {$$.type = $1.type;} |
           Exp COMMA ExpList
     ;
 
-Type : INT | BYTE | BOOL
+Type : INT {$$.type = _INT;} | BYTE {$$.type = _BYTE;} | BOOL {$$.type = _BOOL;}
     ;
 
 Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
-      Exp BINOP Exp |
       ID {$$.type = $1.type;} |
       Call {$$.type = $1.type;} |
-      NUM {$$.type = $1.type;} |
-      NUM B {$$.type = $1.type;} |
-      STRING {$$.type = $1.type;} |
-      TRUE {$$.type = $1.type;} |
-      FALSE {$$.type = $1.type;} |
-      NOT Exp {$$.type = $1.type;} |
+      NUM {$$.type = $1._INT; $.numVal = $1.numVal;} |
+      NUM B {$$.type = $1._BYTE; $$.numVal = $1.numVal;} |
+      STRING {$$.type = $1.type; $$.stringVal = $1.stringVal;} |
+      TRUE {$$.type = $1.type; $$.boolVal = $1.boolVal;} |
+      FALSE {$$.type = $1.type; $$.boolVal = $1.boolVal;} |
+      NOT Exp
+      {
+            if(!isBoolean($1)
+            {
+                output::errorMisMatch(yylineno);
+                exit(0);
+            }
+            $$.type = $1.type;
+            $$.boolVal = !$1.boolVal;
+      } |
       Exp AND Exp
       {
             if($1.type != _BOOL || $1.type != $3.type)
@@ -110,10 +123,35 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
             }
             $$.type = $1.type;
             $$.boolVal = $1.boolVal && $3.boolVal;
-
       } |
-      Exp OR Exp {$$.type = $1.type;} |
-      Exp RELOP Exp {$$.type = $1.type;}
+      Exp OR Exp {$$.type = $1.type;}
+      {
+            if(!isBoolean($1) || !areEqualTypes($1,$3))
+            {
+                output::errorMismatch(yylineno);
+                exit(0);
+            }
+            $$.type = $1.type;
+            $$.boolVal = $1.boolVal || $3.boolVal;
+      } |
+      Exp RELOP Exp
+      {
+            if(!isNumeric($1) || !areEqualTypes($1,$3))
+            {
+                output::errorMisMatch(yylineno);
+                exit(0);
+            }
+            $$.type = _BOOL;
+      } |
+      Exp BINOP Exp
+      {
+            if(!isNumeric($1) || !isNumeric($3))
+            {
+                output::errorMisMatch(yylineno);
+                exit(0);
+            }
+            $$.type = ($1.type == _BYTE) ? $3.type : $1.type;
+      }
     ;
 %%
 
