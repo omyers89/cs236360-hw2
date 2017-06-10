@@ -3,7 +3,6 @@
 #include <exception>
 
 using namespace std;
-using namespace std::exception;
 
 Table::Table(Table* parentTable, scopeType newScopeType):
 															_parentTable(parentTable)
@@ -105,7 +104,7 @@ SymbolTableResult SymbolTable::CallFunc(string name, funcType ftStruct){
 		cout << "in AddVar:" << endl;
 		return true;
 	}
-	bool SymbolTable::GetVar(string name){
+	bool SymbolTable::GetVar(string name, VarData& outData){
 		cout << "in GetVar:" << endl;
 		return true;
 	}
