@@ -116,9 +116,14 @@ Call : ID LPAREN ExpList RPAREN
             fType.retType = $1.type;
             fType.args = $3.expTypes;
             SymbolTableResult res = symbolTable->CallFunc($1.varName,fType);
-            if(res == )
+            if(res == PROTOTYPE_MISMATCH)
             {
                 output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),names);
+                exit(0);
+            }
+            if(res == NOT_DEFINED)
+            {
+                output::errorUndef(yylineno,$1.varName.c_str());
                 exit(0);
             }
             $$.type = $1.type;
