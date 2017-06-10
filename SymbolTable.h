@@ -8,7 +8,7 @@
 #include "Contracts.hpp"
 using namespace std;
 
-typedef enum{ AF_SUCCESS, AF_NOT_DEFINED, AF_PROTOTYPE_MISMATCH} AddFuncResult;
+typedef enum{ SUCCESS,FAIL, NOT_DEFINED, PROTOTYPE_MISMATCH} SymbolTableResult;
 
 typedef struct {
 	varType t;
@@ -17,12 +17,11 @@ typedef struct {
 
 class Table {
 private:
-	int _tableId;
 	map<string, VarData>* _vars;
 	Table* _parentTable;
 	list<scopeType>* scopeList;
 public: 
-	Table(Table* parentTable, int tableId, scopeType newScopeType = _IF);
+	Table(Table* parentTable, scopeType newScopeType = _IF);
 	VarData get(string varName);
 	bool addVar(string name, VarData d);
 	bool contains(string name);
@@ -40,10 +39,8 @@ public:
 };
 
 class Tables{
-	static int TID;
 private:
 	list<Table> _tableStack;
-
 public:
 	void push(Table t);
 	void pop();
@@ -57,7 +54,8 @@ private:
 	Offsets _ofstes;
 public:
 	bool EndProg(); //just pop tables and offsets
-	AddFuncResult AddFunc(string name, funcType ftStruct);
+	SymbolTableResult AddFunc(string name, funcType ftStruct);
+	SymbolTableResult CallFunc(string name, funcType ftStruct);
 	bool OpenScope();//make new table, add to tables and update offsets
 	bool AddVar(string name, varType t); //insert at top table (name, tyoe, offset), and update offset
 	bool GetVar(string name, VarData& outData); //return a reference to the object, or null and false otherwise
