@@ -3,8 +3,7 @@
 
 using namespace std;
 
-Table::Table(Table* parentTable, int tableId, scopeType newScopeType):
-															_tableId(tableId),
+Table::Table(Table* parentTable, scopeType newScopeType):
 															_parentTable(parentTable)
 {
 	_vars = new(map<string, VarData>);
@@ -45,7 +44,7 @@ void Offsets::push(bool isFunc)
 
 void Offsets::pop(){
 	if (_offsetsStack.size() == 0){
-		throw new exception("trying to pop empty stack");
+		throw new exception("trying to pop empty stack Offsets");
 	}
 	_offsetsStack.pop();
 }
@@ -57,18 +56,25 @@ int& Offsets::top(){
 	return _offsetsStack.top();
 }
 
-int Tables::TID = 0;
 void Tables::push(Table t){
-	cout << "in push Tables:" << endl;
-	return;
+	_tableStack.push_front(t);
 }
+
 void Tables::pop(){
-	cout << "in pop Tables:" << endl;
-	return;
+	if (_tableStack.size() == 0){
+		throw new exception("trying to pop empty stack- Tables");
+	}
+	_tableStack.pop_front();
+
 }
+
 Table& Tables::get(int i){
-	cout << "in get Tables:" << endl;
-	return Table(NULL,0);
+	if (_tableStack.size() >= (unsigned)i){
+		throw new exception("invalid index- get tables");
+	}
+	list<Table>::iterator it;
+	advance(it, i);
+	return *it;
 }
 
 
@@ -76,14 +82,23 @@ bool SymbolTable::EndProg(){
 	cout << "in EndProg:" << endl;
 	return true;
 }
-AddFuncResult SymbolTable::AddFunc(string name, funcType t){
+SymbolTableResult SymbolTable::AddFunc(string name, funcType t){
 	cout << "in AddFunc:" << endl;
-	return AF_SUCCESS;
+	return SUCCESS;
 }
+
+SymbolTableResult SymbolTable::CallFunc(string name, funcType ftStruct){
+	cout << "in CallFunc:" << endl;
+	return SUCCESS;
+}
+
+
+
 	bool SymbolTable::OpenScope(){
 		cout << "in OpenScope:" << endl;
-		return true;
+		return SUCCESS;
 	}
+
 	bool SymbolTable::AddVar(string name, varType t){
 		cout << "in AddVar:" << endl;
 		return true;
