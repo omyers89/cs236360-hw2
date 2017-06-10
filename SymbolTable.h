@@ -8,7 +8,6 @@
 #include "Contracts.hpp"
 using namespace std;
 
-
 typedef struct {
 	varType t;
 	int offset;
