@@ -92,12 +92,12 @@ Statements : Statement {$$.type = $1.type;} | Statements Statement {$$.type = $2
 Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
             Type ID SC
             {
-                if(isWhileOrIfIntact)
+                if(symbolTable->IsWhileOrIfIntact)
                 {
                     symbolTable->OpenScope();
-                    isWhileOrIfScopeOpened = true;
+                    symbolTable->IsWhileOrIfScopeOpened = true;
                 }
-                isWhileOrIfIntact = false;
+                symbolTable->IsWhileOrIfIntact = false;
                 if(!symbolTable->AddVar($2.varName,$1.type))
                 {
                     output::errorDef(yylineno,$2.varName.c_str());
@@ -106,12 +106,12 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
             } |
             Type ID ASSIGN Exp SC
             {
-                if(isWhileOrIfIntact)
+                if(symbolTable->IsWhileOrIfIntact)
                 {
                     symbolTable->OpenScope();
-                    isWhileOrIfScopeOpened = true;
+                    symbolTable->IsWhileOrIfScopeOpened = true;
                 }
-                isWhileOrIfIntact = false;
+                symbolTable->IsWhileOrIfIntact = false;
                 if(!areEqualTypes($1,$4));
                 {
                     output::errorMismatch(yylineno);
@@ -242,7 +242,7 @@ Call : ID LPAREN ExpList RPAREN
             {
                 vector<varType> expected;
                 varType retType;
-                SymbolTableResult res = symbolTable->CallFunc($1.varName,$3.expTypes,retType,expected);
+                SymbolTableResult res = symbolTable->CallFunc($1.varName,$3.expTypes,expected,retType);
                 if(res == PROTOTYPE_MISMATCH)
                 {
                     output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),getTypeNames(expected));
@@ -261,7 +261,7 @@ Call : ID LPAREN ExpList RPAREN
             vector<varType> voidVec;
             vector<varType> expected;
             varType retType;
-            SymbolTableResult res = symbolTable->CallFunc($1.varName,voidVec,retType,expected);
+            SymbolTableResult res = symbolTable->CallFunc($1.varName,voidVec,expected,retType);
             if(res == PROTOTYPE_MISMATCH)
             {
                 output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),getTypeNames(expected));
