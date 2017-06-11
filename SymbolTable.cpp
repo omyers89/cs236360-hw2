@@ -84,7 +84,6 @@ bool Tables::pop(){
 	return true;
 }
 
-
 Table* Tables::top(){
 	if (_tableStack.size() == 0){ return NULL; }
 	return _tableStack.back();
@@ -111,7 +110,8 @@ bool SymbolTable::EndProg(){
 //	return true;
 //}
 
-SymbolTableResult SymbolTable::AddFunc(string name, varType newRetType, vector<varType> &newArgs){
+SymbolTableResult SymbolTable::AddFunc(string name, varType newRetType, map<varType,string> &newArgs){
+	//TODO:[TIO]<-[NOAM] newArgs is now a map type with <type,name>.
 	IdType idt;
 	if (GetFunc(name, idt)){
 		return FAIL;

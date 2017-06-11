@@ -68,7 +68,7 @@ public:
 	//bool findVarByName(string name);
 
 	bool EndProg(); //just pop tables and offsets
-	SymbolTableResult AddFunc(string name, varType retType, vector<varType> &args);
+	SymbolTableResult AddFunc(string name, varType retType, map<varType,string> &args);
 	SymbolTableResult CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret);
 
 	bool OpenScope();//make new table, add to tables and update offsets

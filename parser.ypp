@@ -10,8 +10,12 @@
 
 	extern int yylex();
 	int yyerror(char * message);
+	void conditionalOpenScope(SSTYPE value);
 	extern int yylineno;
 	SymbolTable* symbolTable;
+	int whileCounter;
+	bool isWhileOrIfIntact;
+	bool isWhileOrIfScopeOpened;
 %}
 
 %token VOID INT BYTE B BOOL TRUE FALSE RETURN IF WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN LBRACE RBRACE ID NUM STRING
@@ -42,7 +46,7 @@ Funcs : FuncDecl Funcs
 
 FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE M Statements RBRACE
            {
-                SymbolTableResult res = symbolTable->AddFunc($2.varName,$1.type,$4.formalTypes);
+                SymbolTableResult res = symbolTable->AddFunc($2.varName,$1.type,$4.formals);
                 if(res == FAIL)
                 {
                     output::errorDef(yylineno,$2.varName.c_str());
@@ -57,24 +61,24 @@ RetType : Type {$$.type = $1.type;} | VOID { $$.type = _VOID;}
 
 Formals : FormalsList
           {
-            $$.formalTypes.push_back($1.type);
+            $$.formals = $1.formals;
           } | /*epsilon*/
     ;
 
 FormalsList : FormalDecl
               {
-                $$.formalTypes.push_back($1.type);
+                $$.formals = $1.formals;
               } |
               FormalDecl COMMA FormalsList
               {
-                $$.formalTypes.push_back($1.type);
+                $$.formals = $1.formals;
               }
 
     ;
 
 FormalDecl : Type ID
              {
-                $$.formalTypes.push_back($1.type);
+                $$.formals.insert(std::pair<varType,std::string>($1.type,$2.varName));
              }
     ;
 
@@ -82,22 +86,22 @@ Statements : Statement {$$.type = $1.type;} | Statements Statement {$$.type = $2
     ;
 
 Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
-            Type ID SC
+            N Type ID SC
             {
-                if(!symbolTable->AddVar($2.varName,$1.type))
+                if(!symbolTable->AddVar($3.varName,$2.type))
                 {
-                    output::errorDef(yylineno,$2.varName.c_str());
+                    output::errorDef(yylineno,$3.varName.c_str());
                     exit(0);
                 }
             } |
-            Type ID ASSIGN Exp SC
+            N Type ID ASSIGN Exp SC
             {
-                if(!symbolTable->AddVar($2.varName,$1.type))
+                if(!symbolTable->AddVar($3.varName,$2.type))
                 {
-                    output::errorDef(yylineno,$2.varName.c_str());
+                    output::errorDef(yylineno,$3.varName.c_str());
                     exit(0);
                 }
-                if(!areEqualTypes($1,$4));
+                if(!areEqualTypes($2,$5));
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -128,12 +132,58 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
             } |
             Call SC |
             RETURN SC {$$.type = _VOID;} |
-            RETURN Exp SC {$$.type = $1.type;} |
-            IF LPAREN Exp RPAREN Statement |
-            IF LPAREN Exp RPAREN Statement ELSE Statement |
-            WHILE LPAREN Exp RPAREN Statement |
-            BREAK SC |
+            RETURN Exp SC {$$.type = $2.type;} |
+            IF LPAREN Exp RPAREN Statement
+            {
+                if(!isBoolean($3))
+                {
+                    output::errorMismatch(yylineno);
+                    exit(0);
+                }
+            } |
+            IF LPAREN Exp RPAREN K Statement ELSE K Statement
+            {
+                if(!isBoolean($3))
+                {
+                    output::errorMismatch(yylineno);
+                    exit(0);
+                }
+                if(isWhileOrIfScopeOpened)
+                {
+                    symbolTable->EndProg();
+                    isWhileOrIfScopeOpened = false;
+                }
+            } |
+            WHILE LPAREN Exp RPAREN W Statement
+            {
+                if(!isBoolean($3))
+                {
+                    output::errorMismatch(yylineno);
+                    exit(0);
+                }
+                whileCounter--;
+                if(isWhileOrIfScopeOpened)
+                {
+                    symbolTable->EndProg();
+                    isWhileOrIfScopeOpened = false;
+                }
+            } |
+            BREAK SC
+            {
+                if(whileCounter <= 0)
+                {
+                    output::errorUnexpectedBreak(yylineno);
+                    exit(0);
+                }
+            } |
             SWITCH LPAREN Exp RPAREN LBRACE CaseList RBRACE SC
+            {
+                if(!isNumeric($3))
+                {
+                    output::errorMismatch(yylineno);
+                    exit(0);
+                }
+            }
     ;
 
 CaseList : CaseStat CaseList | CaseStat
@@ -284,20 +334,35 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
 M : { symbolTable->OpenScope();}
     ;
 
-N : {symbolTable->IsLoop = true}
+N : {
+        if(isWhileOrIfIntact)
+        {
+            symbolTable->OpenScope();
+            isWhileOrIfScopeOpened = true;
+        }
+        isWhileOrIfIntact = false;
+    }
     ;
 
-K : {if(!symbolTable->IsLoop)
+W : {
+        whileCounter++;
+        isWhileOrIfIntact = true;
+    }
+    ;
+
+K : {isWhileOrIfIntact = true;}
+
 %%
 
-int main()
-{
+int main(){
 	symbolTable = new SymbolTable();
+	whileCounter = 0;
+	isWhileOrIfIntact = false;
+	isWhileOrIfScopeOpened = false;
 	yyparse();
 }
 
-int yyerror(char * message)
-{
+int yyerror(char * message){
 	cout<<"Parse error: "<<message<<endl;
 	exit(0);
 }

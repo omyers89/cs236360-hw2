@@ -11,21 +11,22 @@
 using namespace std;
 
 typedef enum{_BOOL, _INT, _BYTE, _STRING, _VOID} varType;
-typedef enum{_FUNC, _IF, _WHILE, _CASE} scopeType;
+typedef enum{_FUNC, _IF, _WHILE, _CASE, _NEST} scopeType;
 
 
 
 
-typedef vector<varType> varList;
+typedef map<varType,string> varList;
 
 typedef struct {
     int numVal;
     string stringVal;
     bool boolVal;
+    bool isDeclaration;
     string varName;
     varType type;
     varList expTypes;
-    varList formalTypes;
+    varList formals;
 }STYPE;
 
 
