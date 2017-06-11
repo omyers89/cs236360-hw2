@@ -34,21 +34,23 @@ bool Table::addVar(string name, VarData d)
 	}
 	(*_vars)[name] = d;
 	return true;
-
 }
 
 
 
 bool Table::contains(string name)
 {
+	if (_vars->size() == 0){
+		return false;
+	}
 	return (_vars->find(name) != _vars->end());
 }
 
 
-void Offsets::push(bool isFunc)
+void Offsets::push()
 {
 	int curOffset;
-	if (_offsetsStack.size() == 0 || isFunc){
+	if (_offsetsStack.size() == 0){
 		curOffset = 0;
 	}
 	else { curOffset = _offsetsStack.top(); }
@@ -105,29 +107,40 @@ bool SymbolTable::EndProg(){
 
 
 
-//bool SymbolTable::findVarByName(string name){
-//
-//	return true;
-//}
 
-SymbolTableResult SymbolTable::AddFunc(string name, varType newRetType, map<string,varType> &newArgs){
+SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType, varList &argNameTypes){
 	//TODO:[TIO]<-[NOAM] newArgs is now a map type with <type,name>.
 	IdType idt;
-	if (GetFunc(name, idt)){
+	if (GetFunc(funcName, idt)){
 		return FAIL;
 	}
 	IdType newIdType;
 	newIdType.retType = newRetType;
-	newIdType.args = newArgs;
+	newIdType.args = argNameTypes.argTypes;
 	
-	VarData newVarData;
-	newVarData.t = newIdType;
-	newVarData.offset = 0;
-	
-	Table* newTable = new Table(_tables.top(), _FUNC);
-
-	newTable->addVar(name, newVarData);
-	_tables.push(newTable);
+	VarData newFuncData;
+	newFuncData.t = newIdType;
+	newFuncData.offset = 0;
+		
+	//Table* newFuncTable = new Table(_tables.top(), _FUNC);
+	Table* newFuncVarsTable = new Table(_tables.top(), _FUNC);
+	vector<string>::iterator namesIt = argNameTypes.argNames.begin();
+	vector<varType>::iterator typesIt = argNameTypes.argTypes.begin();
+	int noffset = 0;
+	for (; namesIt != argNameTypes.argNames.end(); namesIt++, typesIt++){
+		IdType nRetType;
+		nRetType.retType = *typesIt;
+		VarData nvarData;
+		nvarData.t = nRetType;
+		nvarData.offset = noffset;
+		if (!newFuncVarsTable->addVar(*namesIt, nvarData)){
+			return FAIL;
+		}
+		noffset--;
+	}
+	//_tables.push(newFuncTable);
+	_tables.top()->addVar(funcName, newFuncData);
+	_tables.push(newFuncVarsTable);
 	return SUCCESS;
 }
 
@@ -143,7 +156,7 @@ bool CompareVecs(vector<varType> &callArgs, vector<varType> &expectedArgs){
 	if (it_c == callArgs.end() && it_e == expectedArgs.end()){
 		return true;
 	}
-	
+	return false;
 }
 
 SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret){
@@ -182,7 +195,7 @@ bool SymbolTable::GetFunc(string name, IdType &funType){
 bool SymbolTable::OpenScope(){
 	Table* nt = new Table(_tables.top());
 	_tables.push(nt);
-	_offsetes.push(false);
+	_offsetes.push();
 	return true;
 }
 

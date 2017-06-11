@@ -17,7 +17,6 @@ struct IdType{
 };
 
 
-
 typedef struct {
 	IdType t;
 	int offset;
@@ -41,7 +40,7 @@ class Offsets{
 private:
 	stack<int> _offsetsStack;
 public:
-	void push(bool isFunc);
+	void push();
 	bool pop();
 	int& top();
 
@@ -66,9 +65,16 @@ private:
 	bool GetFunc(string name, IdType &funType);
 public:
 	//bool findVarByName(string name);
-
+	bool IsMainDefined;
+	int WhileCount;
+	bool IsWhileOrIfIntact;
+	bool IsWhileOrIfScopeOpened;
+	SymbolTable() :IsMainDefined(false), 
+					WhileCount(0),
+					IsWhileOrIfIntact(false),
+					IsWhileOrIfScopeOpened(false){ OpenScope(); };
 	bool EndProg(); //just pop tables and offsets
-	SymbolTableResult AddFunc(string name, varType retType, map<string,varType> &args);
+	SymbolTableResult AddFunc(string name, varType retType, varList &argNameTypes);
 	SymbolTableResult CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret);
 
 	bool OpenScope();//make new table, add to tables and update offsets
