@@ -49,7 +49,7 @@ public:
 
 class Tables{
 private:
-	list<Table*> _tableStack;
+	vector<Table*> _tableStack;
 public:
 	void push(Table* t);
 	bool pop();
@@ -65,7 +65,7 @@ private:
 	
 	bool GetFunc(string name, IdType &funType);
 public:
-	bool findVarByName(string name);
+	//bool findVarByName(string name);
 
 	bool EndProg(); //just pop tables and offsets
 	SymbolTableResult AddFunc(string name, varType retType, vector<varType> &args);
@@ -74,7 +74,7 @@ public:
 	bool OpenScope();//make new table, add to tables and update offsets
 	bool AddVar(string name, varType t); //insert at top table (name, tyoe, offset), and update offset
 	bool GetVar(string name, varType& outVarType); //return a reference to the object, or null and false otherwise
-	bool UpdateVar(string name, VarData newData);
+	//bool UpdateVar(string name, VarData newData);
 };
 
 #endif //_TABLES_H_

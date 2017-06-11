@@ -47,10 +47,11 @@ bool Table::contains(string name)
 
 void Offsets::push(bool isFunc)
 {
-	int curOffset = _offsetsStack.top();
-	if (isFunc) {
-		curOffset = 0; //note: functions does not have offset.
+	int curOffset;
+	if (_offsetsStack.size() == 0 || isFunc){
+		curOffset = 0;
 	}
+	else { curOffset = _offsetsStack.top(); }
 	_offsetsStack.push(curOffset);
 }
 
@@ -71,7 +72,7 @@ int& Offsets::top(){
 }
 
 void Tables::push(Table* t){
-	_tableStack.push_front(t);
+	_tableStack.push_back(t);
 }
 
 bool Tables::pop(){
@@ -79,21 +80,21 @@ bool Tables::pop(){
 		//throw new exception("trying to pop empty stack- Tables");
 		return false;
 	}
-	_tableStack.pop_front();
+	_tableStack.pop_back();
 	return true;
 }
 
 
 Table* Tables::top(){
 	if (_tableStack.size() == 0){ return NULL; }
-	return get(0);
+	return _tableStack.back();
 }
 
 Table* Tables::get(int i){
-	if (_tableStack.size() >= (unsigned)i){
+	if ((unsigned)i >= _tableStack.size()){
 		return NULL;
 	}
-	list<Table*>::iterator it;
+	vector<Table*>::iterator it = _tableStack.begin();
 	advance(it, i);
 	return *it;
 }
@@ -105,13 +106,14 @@ bool SymbolTable::EndProg(){
 
 
 
-bool SymbolTable::findVarByName(string name){
-
-	return true;
-}
+//bool SymbolTable::findVarByName(string name){
+//
+//	return true;
+//}
 
 SymbolTableResult SymbolTable::AddFunc(string name, varType newRetType, vector<varType> &newArgs){
-	if (!findVarByName(name)){
+	IdType idt;
+	if (GetFunc(name, idt)){
 		return FAIL;
 	}
 	IdType newIdType;
@@ -135,6 +137,8 @@ bool CompareVecs(vector<varType> &callArgs, vector<varType> &expectedArgs){
 	while (it_c != callArgs.end() && it_e != expectedArgs.end())
 	{
 		if (*it_c != *it_e){ return false; }
+		it_c++;
+		it_e++;
 	}
 	if (it_c == callArgs.end() && it_e == expectedArgs.end()){
 		return true;
@@ -163,12 +167,12 @@ SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &callArgs, 
 bool SymbolTable::GetFunc(string name, IdType &funType){
 	Table* curTable = _tables.top();
 	while (curTable != NULL){
-		curTable = curTable->_parentTable;
 		VarData vd;
 		if (curTable->get(name, vd)){
 			funType = vd.t;
 			return true;
 		}
+		curTable = curTable->_parentTable;
 	}
 	return false;
 
@@ -183,7 +187,8 @@ bool SymbolTable::OpenScope(){
 }
 
 bool SymbolTable::AddVar(string name, varType t){
-	if (!findVarByName(name)){
+	IdType idt;
+	if (GetFunc(name, idt)){
 		return FAIL;
 	}
 	VarData vd;
@@ -196,7 +201,6 @@ bool SymbolTable::AddVar(string name, varType t){
 	return true;
 }
 bool SymbolTable::GetVar(string name, varType& outVarType){
-	
 	IdType idt;
 	bool ex = GetFunc(name, idt);
 	outVarType = idt.retType;
