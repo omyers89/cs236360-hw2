@@ -34,6 +34,11 @@
 
 Program	: Funcs
           {
+            if(!symbolTable->IsMainDefined)
+            {
+                output::errorMainMissing();
+                exit(0);
+            }
             symbolTable->EndProg();
           }
 	;
@@ -52,6 +57,8 @@ FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE M Statements RBRACE
                     output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
+                if($2.varName == MAIN && $4.formals.argTypes.size() == 0)
+                    symbolTable->IsMainDefined = true;
                 symbolTable->EndProg();
            }
     ;
@@ -78,7 +85,8 @@ FormalsList : FormalDecl
 
 FormalDecl : Type ID
              {
-                $$.formals.insert(std::pair<std::string,varType>($2.varName,$1.type));
+                $$.formals.argTypes.push_back($1.type);
+                $$.formals.argNames.push_back($2.varName);
              }
     ;
 

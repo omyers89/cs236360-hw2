@@ -38,5 +38,6 @@ typedef struct {
 #define MAXINTLENGTH 11
 #define LIBPRINT "print"
 #define LIBPRINTI "printi"
+#define MAIN "main"
 
 #endif
