@@ -16,7 +16,10 @@ typedef enum{_FUNC, _IF, _WHILE, _CASE, _NEST} scopeType;
 
 
 
-typedef map<varType,string> varList;
+typedef struct{
+	vector<varType> argTypes;
+	vector<varType> argNames;
+} varList;
 
 typedef struct {
     int numVal;
@@ -25,7 +28,7 @@ typedef struct {
     bool isDeclaration;
     string varName;
     varType type;
-    varList expTypes;
+	vector<varType> expTypes;
     varList formals;
 }STYPE;
 
