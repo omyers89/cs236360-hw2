@@ -10,12 +10,8 @@
 
 	extern int yylex();
 	int yyerror(char * message);
-	void conditionalOpenScope(SSTYPE value);
 	extern int yylineno;
 	SymbolTable* symbolTable;
-	int whileCounter;
-	bool isWhileOrIfIntact;
-	bool isWhileOrIfScopeOpened;
 %}
 
 %token VOID INT BYTE B BOOL TRUE FALSE RETURN IF WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN LBRACE RBRACE ID NUM STRING
@@ -94,24 +90,36 @@ Statements : Statement {$$.type = $1.type;} | Statements Statement {$$.type = $2
     ;
 
 Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
-            N Type ID SC
+            Type ID SC
             {
-                if(!symbolTable->AddVar($3.varName,$2.type))
+                if(isWhileOrIfIntact)
                 {
-                    output::errorDef(yylineno,$3.varName.c_str());
+                    symbolTable->OpenScope();
+                    isWhileOrIfScopeOpened = true;
+                }
+                isWhileOrIfIntact = false;
+                if(!symbolTable->AddVar($2.varName,$1.type))
+                {
+                    output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
             } |
-            N Type ID ASSIGN Exp SC
+            Type ID ASSIGN Exp SC
             {
-                if(!symbolTable->AddVar($3.varName,$2.type))
+                if(isWhileOrIfIntact)
                 {
-                    output::errorDef(yylineno,$3.varName.c_str());
-                    exit(0);
+                    symbolTable->OpenScope();
+                    isWhileOrIfScopeOpened = true;
                 }
-                if(!areEqualTypes($2,$5));
+                isWhileOrIfIntact = false;
+                if(!areEqualTypes($1,$4));
                 {
                     output::errorMismatch(yylineno);
+                    exit(0);
+                }
+                if(!symbolTable->AddVar($2.varName,$1.type))
+                {
+                    output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
             } |
@@ -141,12 +149,17 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
             Call SC |
             RETURN SC {$$.type = _VOID;} |
             RETURN Exp SC {$$.type = $2.type;} |
-            IF LPAREN Exp RPAREN Statement
+            IF LPAREN Exp RPAREN K Statement
             {
                 if(!isBoolean($3))
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
+                }
+                if(symbolTable->IsWhileOrIfScopeOpened)
+                {
+                    symbolTable->EndProg();
+                    symbolTable->IsWhileOrIfScopeOpened = false;
                 }
             } |
             IF LPAREN Exp RPAREN K Statement ELSE K Statement
@@ -156,10 +169,10 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     output::errorMismatch(yylineno);
                     exit(0);
                 }
-                if(isWhileOrIfScopeOpened)
+                if(symbolTable->IsWhileOrIfScopeOpened)
                 {
                     symbolTable->EndProg();
-                    isWhileOrIfScopeOpened = false;
+                    symbolTable->IsWhileOrIfScopeOpened = false;
                 }
             } |
             WHILE LPAREN Exp RPAREN W Statement
@@ -169,16 +182,16 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     output::errorMismatch(yylineno);
                     exit(0);
                 }
-                whileCounter--;
-                if(isWhileOrIfScopeOpened)
+                symbolTable->WhileCount--;
+                if(symbolTable->IsWhileOrIfScopeOpened)
                 {
                     symbolTable->EndProg();
-                    isWhileOrIfScopeOpened = false;
+                    symbolTable->IsWhileOrIfScopeOpened = false;
                 }
             } |
             BREAK SC
             {
-                if(whileCounter <= 0)
+                if(symbolTable->WhileCount <= 0)
                 {
                     output::errorUnexpectedBreak(yylineno);
                     exit(0);
@@ -342,35 +355,23 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
 M : { symbolTable->OpenScope();}
     ;
 
-N : {
-        if(isWhileOrIfIntact)
-        {
-            symbolTable->OpenScope();
-            isWhileOrIfScopeOpened = true;
-        }
-        isWhileOrIfIntact = false;
-    }
-    ;
-
 W : {
-        whileCounter++;
-        isWhileOrIfIntact = true;
+        symbolTable->WhileCount++;
+        symbolTable->IsWhileOrIfIntact = true;
     }
     ;
 
-K : {isWhileOrIfIntact = true;}
+K : { symbolTable->IsWhileOrIfIntact = true;}
+    ;
 
 %%
 
 int main(){
 	symbolTable = new SymbolTable();
-	whileCounter = 0;
-	isWhileOrIfIntact = false;
-	isWhileOrIfScopeOpened = false;
 	yyparse();
 }
 
 int yyerror(char * message){
-	cout<<"Parse error: "<<message<<endl;
+	output::errorSyn(yylineno);
 	exit(0);
 }

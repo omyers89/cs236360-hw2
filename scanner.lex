@@ -8,10 +8,9 @@
 #include <iostream>
 #include "Contracts.hpp"
 #include "parser.tab.hpp"
+#include "output.hpp"
 void showToken(std::string name);
 void printErr();
-void printEscapeErr(std::string name);
-char* handleAsciiChar();
 char buf[100];
 char *s;
 
@@ -163,26 +162,7 @@ void showToken(std::string name)
     #endif
 }
 
-void printEscapeErr(std::string name)
-{
-    cout << "Error " << name << " " << yytext+1 << endl;
-    exit(0);
-}
-
 void printErr(){
-    printf("Error %s\n", yytext);
-    exit(0);
+    output::errorLex(yylineno);
 }
 
-char* handleAsciiChar(){
-
-    char prefix = '#';
-    int num = (int)strtol(yytext+2, NULL, 16);
-    char * buffer = (char *) malloc(strlen(yytext));
-
-    sprintf(buffer,"%c",prefix);
-    sprintf(buffer + strlen(buffer),"%d",num);
-    sprintf(buffer + strlen(buffer),"%c",prefix);
-
-    return buffer;
-}
