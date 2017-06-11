@@ -110,7 +110,7 @@ bool SymbolTable::EndProg(){
 //	return true;
 //}
 
-SymbolTableResult SymbolTable::AddFunc(string name, varType newRetType, map<varType,string> &newArgs){
+SymbolTableResult SymbolTable::AddFunc(string name, varType newRetType, map<string,varType> &newArgs){
 	//TODO:[TIO]<-[NOAM] newArgs is now a map type with <type,name>.
 	IdType idt;
 	if (GetFunc(name, idt)){

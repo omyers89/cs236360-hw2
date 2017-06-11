@@ -78,7 +78,7 @@ FormalsList : FormalDecl
 
 FormalDecl : Type ID
              {
-                $$.formals.insert(std::pair<varType,std::string>($1.type,$2.varName));
+                $$.formals.insert(std::pair<std::string,varType>($2.varName,$1.type));
              }
     ;
 
