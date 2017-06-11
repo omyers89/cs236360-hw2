@@ -18,7 +18,7 @@ typedef enum{_FUNC, _IF, _WHILE, _CASE, _NEST} scopeType;
 
 typedef struct{
 	vector<varType> argTypes;
-	vector<varType> argNames;
+	vector<string> argNames;
 } varList;
 
 typedef struct {
