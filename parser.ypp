@@ -149,7 +149,8 @@ Call : ID LPAREN ExpList RPAREN
             {
                 if(!($3.expTypes.size() == 1) || !($3.type == _STRING))
                 {
-                    std::vector<const char*> stringVec = {"string"};
+                    std::vector<const char*> stringVec;
+                    stringVec.push_back("string");
                     output::errorPrototypeMismatch(yylineno,LIBPRINT,stringVec);
                     exit(0);
                 }
@@ -159,7 +160,8 @@ Call : ID LPAREN ExpList RPAREN
             {
                 if(!($3.expTypes.size() == 1) || !isNumeric($3))
                 {
-                    std::vector<const char*> intVec = {"int"};
+                    std::vector<const char*> intVec;
+                    intVec.push_back("int");
                     output::errorPrototypeMismatch(yylineno,LIBPRINT,intVec);
                     exit(0);
                 }
@@ -187,7 +189,8 @@ Call : ID LPAREN ExpList RPAREN
         {
             vector<varType> voidVec;
             vector<varType> expected;
-            SymbolTableResult res = symbolTable->CallFunc($1.varName,voidVec,expected);
+            varType retType;
+            SymbolTableResult res = symbolTable->CallFunc($1.varName,voidVec,retType,expected);
             if(res == PROTOTYPE_MISMATCH)
             {
                 output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),getTypeNames(expected));
@@ -280,6 +283,11 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
 
 M : { symbolTable->OpenScope();}
     ;
+
+N : {symbolTable->IsLoop = true}
+    ;
+
+K : {if(!symbolTable->IsLoop)
 %%
 
 int main()
