@@ -34,6 +34,11 @@
 
 Program	: Funcs
           {
+            if(!symbolTable->IsMainDefined)
+            {
+                output::errorMainMissing();
+                exit(0);
+            }
             symbolTable->EndProg();
           }
 	;
