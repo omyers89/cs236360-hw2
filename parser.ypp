@@ -48,6 +48,7 @@ Funcs : FuncDecl Funcs
 
 FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE M Statements RBRACE
            {
+                std::cout << "FuncDecl: "  << $9.type << endl;
                 if($1.type != $9.type)
                 {
                     output::errorMismatch(yylineno);
@@ -136,7 +137,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     exit(0);
                 }
             } |
-            Call SC |
+            Call SC {$$.type = $1.type;} |
             RETURN SC {$$.type = _VOID;} |
             RETURN Exp SC {$$.type = $2.type;} |
             IF LPAREN Exp RPAREN K Statement
@@ -204,7 +205,7 @@ CaseStat : CASE NUM COLON Statement BREAK SC |
            CASE NUM B COLON Statement BREAK SC
     ;
 
-Call : ID LPAREN ExpList {symbolTable->FlushExpList();} RPAREN
+Call : ID LPAREN ExpList RPAREN
         {
             if($1.varName == LIBPRINT)
             {
@@ -216,6 +217,7 @@ Call : ID LPAREN ExpList {symbolTable->FlushExpList();} RPAREN
                     exit(0);
                 }
                 $$.type = _VOID;
+                symbolTable->FlushExpList();
             }
             else if($1.varName == LIBPRINTI)
             {
@@ -227,6 +229,7 @@ Call : ID LPAREN ExpList {symbolTable->FlushExpList();} RPAREN
                     exit(0);
                 }
                 $$.type = _VOID;
+                symbolTable->FlushExpList();
             }
             else
             {
@@ -244,6 +247,7 @@ Call : ID LPAREN ExpList {symbolTable->FlushExpList();} RPAREN
                     exit(0);
                 }
                 $$.type = retType;
+                symbolTable->FlushExpList();
             }
         } |
         ID LPAREN RPAREN
