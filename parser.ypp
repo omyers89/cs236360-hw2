@@ -79,7 +79,7 @@ FormalDecl : Type ID
 Statements : Statement {$$.type = $1.type;} | Statements Statement {$$.type = $2.type;}
     ;
 
-Statement : LBRACE M Statements RBRACE {symbolTable->EndScope();} |
+Statement : V LBRACE M Statements RBRACE {symbolTable->EndScope();} |
             Type ID SC
             {
                 if(symbolTable->IsWhileOrIfIntact)
@@ -366,6 +366,9 @@ W : {
     ;
 
 K : { symbolTable->IsWhileOrIfIntact = true;}
+    ;
+
+V : {symbolTable->IsWhileOrIfIntact = false;}
     ;
 
 %%
