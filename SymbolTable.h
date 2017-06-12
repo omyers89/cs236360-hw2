@@ -17,6 +17,9 @@ struct IdType{
 };
 
 
+typedef vector<varType>::iterator varIt;
+typedef vector<string>::iterator nameIt;
+
 typedef struct {
 	IdType t;
 	int offset;
