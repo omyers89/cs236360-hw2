@@ -164,5 +164,6 @@ void showToken(std::string name)
 
 void printErr(){
     output::errorLex(yylineno);
+    exit(0);
 }
 
