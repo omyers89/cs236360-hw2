@@ -94,6 +94,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
+                $$.type = $3.type;
             } |
             Type ID ASSIGN Exp SC
             {
@@ -152,6 +153,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     symbolTable->EndProg();
                     symbolTable->IsWhileOrIfScopeOpened = false;
                 }
+                $$.type = $6.type;
             } |
             IF LPAREN Exp RPAREN K Statement ELSE K Statement
             {
@@ -165,6 +167,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     symbolTable->EndProg();
                     symbolTable->IsWhileOrIfScopeOpened = false;
                 }
+                $$.type = $9.type;
             } |
             WHILE LPAREN Exp RPAREN W Statement
             {
@@ -285,8 +288,14 @@ Type : INT {$$.type = _INT;} | BYTE {$$.type = _BYTE;} | BOOL {$$.type = _BOOL;}
 Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       ID
       {
-        $$.type = $1.type;
-        $$.varName = $1.varName;
+            varType type;
+            bool result = symbolTable->GetVar($1.varName,type);
+            if(!result)
+            {
+                output::errorUndef(yylineno,$1.varName.c_str());
+                exit(0);
+            }
+            $$.type = type;
       } |
       Call {$$.type = $1.type;} |
       NUM {$$.type = _INT; $$.numVal = $1.numVal;} |
