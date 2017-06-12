@@ -231,9 +231,8 @@ void SymbolTable::AddToFormalList(string varName, varType type){
 
 		//return true;
 	}
-void SymbolTable::AddToExpList(string varName, varType type){
+void SymbolTable::AddToExpList( varType type){
 	cout << "in AddToExpList:" << endl;
-	cout << "	name is:" << varName << endl;
 	cout << "	Type is:" << type << endl;
 }
 void SymbolTable::FlushFormalList(){
