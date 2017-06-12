@@ -21,6 +21,7 @@ bool isString(STYPE a){
 }
 
 bool areEqualTypes(STYPE a,STYPE b){
+    cout << a.type << "," << b.type << endl;
     return a.type == b.type;
 }
 

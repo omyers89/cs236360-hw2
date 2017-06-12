@@ -5,6 +5,7 @@
 #ifndef CS236360_HW2_UTILS_H
 #define CS236360_HW2_UTILS_H
 #include "Contracts.hpp"
+#include <iostream>
 
 bool areEqualTypes(STYPE a,STYPE b);
 bool isBoolean(STYPE a);

@@ -10,6 +10,7 @@
 
 	extern int yylex();
 	int yyerror(char * message);
+	void addFunc(STYPE id, STYPE args, STYPE ret);
 	extern int yylineno;
 	SymbolTable* symbolTable;
 %}
@@ -45,14 +46,8 @@ Funcs : FuncDecl Funcs
         } | /*epsilon*/
 	;
 
-FuncDecl : RetType ID LPAREN Formals RPAREN LBRACE M Statements RBRACE
+FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$4,$1);} LBRACE M Statements RBRACE
            {
-                SymbolTableResult res = symbolTable->AddFunc($2.varName,$1.type,$4.formals);
-                if(res == FAIL)
-                {
-                    output::errorDef(yylineno,$2.varName.c_str());
-                    exit(0);
-                }
                 if($2.varName == MAIN && $4.formals.argTypes.size() == 0)
                     symbolTable->IsMainDefined = true;
                 symbolTable->EndProg();
@@ -112,7 +107,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     symbolTable->IsWhileOrIfScopeOpened = true;
                 }
                 symbolTable->IsWhileOrIfIntact = false;
-                if(!areEqualTypes($1,$4));
+                if(!areEqualTypes($1,$4))
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -375,3 +370,13 @@ int yyerror(char * message){
 	output::errorSyn(yylineno);
 	exit(0);
 }
+
+void addFunc(STYPE id, STYPE args, STYPE ret){
+    SymbolTableResult res = symbolTable->AddFunc(id.varName,ret.type,args.formals);
+    if(res == FAIL)
+    {
+        output::errorDef(yylineno,id.varName.c_str());
+        exit(0);
+    }
+}
+
