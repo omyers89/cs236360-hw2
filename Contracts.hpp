@@ -28,8 +28,6 @@ typedef struct {
     bool isDeclaration;
     string varName;
     varType type;
-	vector<varType> expTypes;
-    varList formals;
 }STYPE;
 
 

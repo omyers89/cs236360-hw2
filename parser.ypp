@@ -10,7 +10,7 @@
 
 	extern int yylex();
 	int yyerror(char * message);
-	void addFunc(STYPE id, STYPE args, STYPE ret);
+	void addFunc(STYPE id, STYPE ret);
 	extern int yylineno;
 	SymbolTable* symbolTable;
 %}
@@ -46,7 +46,7 @@ Funcs : FuncDecl Funcs
         } | /*epsilon*/
 	;
 
-FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$4,$1);} LBRACE M Statements RBRACE
+FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE M Statements RBRACE
            {
                 if($2.varName == MAIN && $4.formals.argTypes.size() == 0)
                     symbolTable->IsMainDefined = true;
@@ -57,27 +57,16 @@ FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$4,$1);} LBRACE M Statem
 RetType : Type {$$.type = $1.type;} | VOID { $$.type = _VOID;}
     ;
 
-Formals : FormalsList
-          {
-            $$.formals = $1.formals;
-          } | /*epsilon*/
+Formals : FormalsList | /*epsilon*/
     ;
 
-FormalsList : FormalDecl
-              {
-                $$.formals = $1.formals;
-              } |
+FormalsList : FormalDecl |
               FormalDecl COMMA FormalsList
-              {
-                $$.formals = $1.formals;
-              }
-
     ;
 
 FormalDecl : Type ID
              {
-                $$.formals.argTypes.push_back($1.type);
-                $$.formals.argNames.push_back($2.varName);
+                symbolTable->AddToFormalList($2.varName,$1.type);
              }
     ;
 
@@ -209,11 +198,11 @@ CaseStat : CASE NUM COLON Statement BREAK SC |
            CASE NUM B COLON Statement BREAK SC
     ;
 
-Call : ID LPAREN ExpList RPAREN
+Call : ID LPAREN ExpList {symbolTable->FlushExpList();} RPAREN
         {
             if($1.varName == LIBPRINT)
             {
-                if(!($3.expTypes.size() == 1) || !($3.type == _STRING))
+                if((symbolTable->expList.size() != 1) || !isString(symbolTable->expList.back().type))
                 {
                     std::vector<const char*> stringVec;
                     stringVec.push_back("string");
@@ -224,7 +213,7 @@ Call : ID LPAREN ExpList RPAREN
             }
             else if($1.varName == LIBPRINTI)
             {
-                if(!($3.expTypes.size() == 1) || !isNumeric($3))
+                if((symbolTable->expList.size() != 1) || !isNumeric(symbolTable->expList.back().type))
                 {
                     std::vector<const char*> intVec;
                     intVec.push_back("int");
@@ -237,7 +226,7 @@ Call : ID LPAREN ExpList RPAREN
             {
                 vector<varType> expected;
                 varType retType;
-                SymbolTableResult res = symbolTable->CallFunc($1.varName,$3.expTypes,expected,retType);
+                SymbolTableResult res = symbolTable->CallFunc($1.varName,expected,retType);
                 if(res == PROTOTYPE_MISMATCH)
                 {
                     output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),getTypeNames(expected));
@@ -273,12 +262,11 @@ Call : ID LPAREN ExpList RPAREN
 
 ExpList : Exp
           {
-            $$.type = $1.type;
-            $$.expTypes.push_back($1.type);
+            symbolTable->AddToExpList($1.type);
           } |
           Exp COMMA ExpList
           {
-            $$.expTypes.push_back($1.type);
+            symbolTable->AddToExpList($1.type);
           }
     ;
 
@@ -371,12 +359,13 @@ int yyerror(char * message){
 	exit(0);
 }
 
-void addFunc(STYPE id, STYPE args, STYPE ret){
-    SymbolTableResult res = symbolTable->AddFunc(id.varName,ret.type,args.formals);
+void addFunc(STYPE id, STYPE ret){
+    SymbolTableResult res = symbolTable->AddFunc(id.varName,ret.type);
     if(res == FAIL)
     {
         output::errorDef(yylineno,id.varName.c_str());
         exit(0);
     }
+    symbolTable->FlushFormalList();
 }
 
