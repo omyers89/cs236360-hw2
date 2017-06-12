@@ -7,10 +7,10 @@
 #include "Contracts.hpp"
 #include <iostream>
 
-bool areEqualTypes(STYPE a,STYPE b);
-bool isBoolean(STYPE a);
-bool isNumeric(STYPE a);
-bool isString(STYPE a);
+bool areEqualTypes(varType a,varType b);
+bool isBoolean(varType a);
+bool isNumeric(varType a);
+bool isString(varType a);
 bool isInt(STYPE a);
 bool isByte(varType a);
 bool validateFunc(std::vector<varType,string> argV,std::vector<varType> expV);

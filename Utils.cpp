@@ -8,25 +8,24 @@ bool isByte(varType a){
     return a == _BYTE;
 }
 
-bool isInt(STYPE a){
-    return a.type == _INT;
+bool isInt(varType a){
+    return a == _INT;
 }
 
-bool isBoolean(STYPE a){
-    return a.type == _BOOL;
+bool isBoolean(varType a){
+    return a == _BOOL;
 }
 
-bool isString(STYPE a){
-    return a.type == _STRING;
+bool isString(varType a){
+    return a == _STRING;
 }
 
-bool areEqualTypes(STYPE a,STYPE b){
-    cout << a.type << "," << b.type << endl;
-    return a.type == b.type;
+bool areEqualTypes(varType a,varType b){
+    return a == b;
 }
 
-bool isNumeric(STYPE a){
-    return isInt(a) || isByte(a.type);
+bool isNumeric(varType a){
+    return isInt(a) || isByte(a);
 }
 
 char * toString(int num){
