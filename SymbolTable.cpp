@@ -146,7 +146,7 @@ Table* Tables::get(int i){
 
 
 bool SymbolTable::EndScope(){
-	cout << "table stack size is:" << _tables._tableStack.size() << endl;
+	//cout << "table stack size is:" << _tables._tableStack.size() << endl;
 	output::endScope();
 	Table* tmpT = _tables.top();
 	if (NULL == tmpT) { 
