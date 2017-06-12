@@ -82,7 +82,7 @@ public:
 					IsWhileOrIfIntact(false),
 					IsWhileOrIfScopeOpened(false),
 					ReturnType(_VOID){ OpenScope(); };
-	bool EndProg(); //just pop tables and offsets
+	bool EndScope(); //just pop tables and offsets
 	//SymbolTableResult AddFunc(string name, varType retType, varList &argNameTypes);
 	SymbolTableResult AddFunc(string name, varType retType);
 	//SymbolTableResult CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret);

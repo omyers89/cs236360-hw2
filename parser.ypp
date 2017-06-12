@@ -36,7 +36,7 @@ Program	: Funcs
                 output::errorMainMissing();
                 exit(0);
             }
-            symbolTable->EndProg();
+            symbolTable->EndScope();
           }
 	;
 
@@ -57,7 +57,7 @@ FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE M Statement
                     symbolTable->IsMainDefined = true;
                 symbolTable->FlushFormalList();
                 symbolTable->ReturnType = _VOID;
-                symbolTable->EndProg();
+                symbolTable->EndScope();
            }
     ;
 
@@ -80,7 +80,7 @@ FormalDecl : Type ID
 Statements : Statement {$$.type = $1.type;} | Statements Statement {$$.type = $2.type;}
     ;
 
-Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
+Statement : LBRACE M Statements RBRACE {symbolTable->EndScope();} |
             Type ID SC
             {
                 if(symbolTable->IsWhileOrIfIntact)
@@ -154,7 +154,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                 }
                 if(symbolTable->IsWhileOrIfScopeOpened)
                 {
-                    symbolTable->EndProg();
+                    symbolTable->EndScope();
                     symbolTable->IsWhileOrIfScopeOpened = false;
                 }
                 $$.type = $6.type;
@@ -168,7 +168,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                 }
                 if(symbolTable->IsWhileOrIfScopeOpened)
                 {
-                    symbolTable->EndProg();
+                    symbolTable->EndScope();
                     symbolTable->IsWhileOrIfScopeOpened = false;
                 }
                 $$.type = $9.type;
@@ -183,7 +183,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                 symbolTable->WhileCount--;
                 if(symbolTable->IsWhileOrIfScopeOpened)
                 {
-                    symbolTable->EndProg();
+                    symbolTable->EndScope();
                     symbolTable->IsWhileOrIfScopeOpened = false;
                 }
             } |
