@@ -49,7 +49,7 @@ Funcs : FuncDecl Funcs
 FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE M Statements RBRACE
            {
                 std::cout << "FuncDecl: "  << $9.type << endl;
-                if($1.type != $9.type)
+                if($1.type != symbolTable->ReturnType;)
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -57,6 +57,7 @@ FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE M Statement
                 if($2.varName == MAIN && symbolTable->formalList.argTypes.size() == 0)
                     symbolTable->IsMainDefined = true;
                 symbolTable->FlushFormalList();
+                symbolTable->ReturnType = _VOID;
                 symbolTable->EndProg();
            }
     ;
@@ -139,8 +140,8 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                 }
             } |
             Call SC {$$.type = $1.type;} |
-            RETURN SC {$$.type = _VOID;} |
-            RETURN Exp SC {$$.type = $2.type;} |
+            RETURN SC {symbolTable->ReturnType = _VOID;} |
+            RETURN Exp SC {symbolTable->ReturnType = $2.type;} |
             IF LPAREN Exp RPAREN K Statement
             {
                 if(!isBoolean($3.type))
