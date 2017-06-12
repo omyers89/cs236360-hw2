@@ -48,8 +48,7 @@ Funcs : FuncDecl Funcs
 
 FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE M Statements RBRACE
            {
-                std::cout << "FuncDecl: "  << $9.type << endl;
-                if($1.type != symbolTable->ReturnType;)
+                if($1.type != symbolTable->ReturnType)
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -90,11 +89,13 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     symbolTable->IsWhileOrIfScopeOpened = true;
                 }
                 symbolTable->IsWhileOrIfIntact = false;
-                if(!symbolTable->AddVar($2.varName,$1.type))
+                varType out;
+                if(symbolTable->GetVar($2.varName,out))
                 {
                     output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
+                symbolTable->AddVar($2.varName,$1.type);
                 $$.type = $3.type;
             } |
             Type ID ASSIGN Exp SC
@@ -110,11 +111,13 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     output::errorMismatch(yylineno);
                     exit(0);
                 }
-                if(!symbolTable->AddVar($2.varName,$1.type))
+                varType out;
+                if(symbolTable->GetVar($2.varName,out))
                 {
                     output::errorDef(yylineno,$2.varName.c_str());
                     exit(0);
                 }
+                symbolTable->AddVar($2.varName,$1.type);
             } |
             ID ASSIGN Exp SC
             {
@@ -126,7 +129,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                 }
                 if(isByte(t) && isNumeric($3.type) && $3.numVal > MAXBYTE)
                 {
-                    char* str = toString($3.numVal); //TODO: try to find a better inToString
+                    char* str = toString($3.numVal); //TODO: try to find a better intToString
                     output::errorByteTooLarge(yylineno,str);
                     free(str); //TODO: i'm crying
                     exit(0);
