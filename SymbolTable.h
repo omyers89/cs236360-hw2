@@ -8,7 +8,7 @@
 #include "Contracts.hpp"
 using namespace std;
 
-typedef enum{ SUCCESS,FAIL, NOT_DEFINED, PROTOTYPE_MISMATCH} SymbolTableResult;
+typedef enum{ SUCCESS,FAIL, FAIL_ALREADY_DEFINED, NOT_DEFINED, PROTOTYPE_MISMATCH} SymbolTableResult;
 
 
 struct IdType{
@@ -52,8 +52,9 @@ public:
 
 class Offsets{
 private:
-	stack<int> _offsetsStack;
+	
 public:
+	stack<int> _offsetsStack;
 	void push();
 	bool pop();
 	int& top();
@@ -62,8 +63,9 @@ public:
 
 class Tables{
 private:
-	vector<Table*> _tableStack;
+	
 public:
+	vector<Table*> _tableStack;
 	void push(Table* t);
 	bool pop();
 	Table* top();

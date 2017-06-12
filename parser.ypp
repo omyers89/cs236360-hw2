@@ -45,13 +45,14 @@ Funcs : FuncDecl Funcs
         } | /*epsilon*/
 	;
 
-FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE M Statements RBRACE
+FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE Statements RBRACE
            {
                 if($2.varName == MAIN && symbolTable->formalList.argTypes.size() == 0)
                     symbolTable->IsMainDefined = true;
+				symbolTable->EndScope();
                 symbolTable->FlushFormalList();
                 symbolTable->ReturnType = _VOID;
-                symbolTable->EndScope();
+                
            }
     ;
 
@@ -367,6 +368,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
 
 M : { symbolTable->OpenScope();}
     ;
+
 
 W : {
         symbolTable->WhileCount++;
