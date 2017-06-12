@@ -1,28 +1,28 @@
 
 #include "SymbolTable.h"
+#include "Utils.hpp"
 #include <exception>
 
 using namespace std;
 
 Table::Table(Table* parentTable, scopeType newScopeType) : _parentTable(parentTable)
 {
-	_vars = new(map<string, VarData>);
+	//_vars = new(map<string, VarData>);
+	_variables = new(vector<TableEntry>);
 	scopeList = new (list<scopeType>);
 }
 
 Table::~Table()
 {
-	delete(_vars);
+	delete(_variables);
 	delete(scopeList);
 }
 
 bool Table::get(string varName, VarData& dat){
-	if (!contains(varName)){
+	
+	if (!contains(varName, dat)){
 		return false;
 	}
-	VarData vd = _vars->find(varName)->second;
-	dat.t = vd.t;
-	dat.offset = vd.offset;
 	return true;
 }
 
@@ -32,20 +32,64 @@ bool Table::addVar(string name, VarData d)
 	{
 		return false;
 	}
-	(*_vars)[name] = d;
+	TableEntry tmpTent;
+	tmpTent.name = name;
+	tmpTent.offset = d.offset;
+	tmpTent.t = d.t;
+	_variables->push_back(tmpTent);
 	return true;
 }
 
 
 
-bool Table::contains(string name)
+bool Table::contains(string name, VarData &vd)
 {
-	if (_vars->size() == 0){
+	if (_variables->size() == 0){
 		return false;
 	}
-	return (_vars->find(name) != _vars->end());
+	TableIt it = _variables->begin();
+	for (; it != _variables->end(); it++){
+		if ((*it).name == name){
+			vd.t = (*it).t;
+			vd.offset = (*it).offset;
+			return true;
+		}
+	}
+	return false;
 }
 
+
+bool Table::contains(string name)
+{
+	if (_variables->size() == 0){
+		return false;
+	}
+	TableIt it = _variables->begin();
+	for (; it != _variables->end(); it++){
+		if ((*it).name == name){
+			return true;
+		}
+	}
+	return false;
+}
+
+void Table::printScope(){
+	if (_variables->size() == 0){
+		return;
+	}
+	TableIt it = _variables->begin();
+	for (; it != _variables->end(); it++){
+		if (it->t.args.size() > 0){
+			string funStrType = output::makeFunctionType(typeToString(it->t.retType),
+				getTypeNames(it->t.args));
+			output::printID((it->name).c_str(), it->offset, funStrType.c_str());
+		}
+		else{
+			string varStrType = typeToString(it->t.retType);
+			output::printID((it->name).c_str(), it->offset, varStrType.c_str());
+		}
+	}
+}
 
 void Offsets::push()
 {
@@ -102,55 +146,16 @@ Table* Tables::get(int i){
 
 
 bool SymbolTable::EndScope(){
-
-
 	output::endScope();
+	Table* tmpT = _tables.top();
+	tmpT->printScope();
 	return _tables.pop() && _offsetes.pop();
 }
 
 
 
 
-//SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType, varList &argNameTypes){
-//	//TODO:[TIO]<-[NOAM] newArgs is now a map type with <type,name>.
-//	IdType idt;
-//	if (GetFunc(funcName, idt)){
-//		return FAIL;
-//	}
-//	IdType newIdType;
-//	newIdType.retType = newRetType;
-//	newIdType.args = argNameTypes.argTypes;
-//	
-//	VarData newFuncData;
-//	newFuncData.t = newIdType;
-//	newFuncData.offset = 0;
-//		
-//	//Table* newFuncTable = new Table(_tables.top(), _FUNC);
-//	Table* newFuncVarsTable = new Table(_tables.top(), _FUNC);
-//	vector<string>::iterator namesIt = argNameTypes.argNames.begin();
-//	vector<varType>::iterator typesIt = argNameTypes.argTypes.begin();
-//	int noffset = 0;
-//	for (; namesIt != argNameTypes.argNames.end(); namesIt++, typesIt++){
-//		IdType nRetType;
-//		nRetType.retType = *typesIt;
-//		VarData nvarData;
-//		nvarData.t = nRetType;
-//		nvarData.offset = noffset;
-//		if (!newFuncVarsTable->addVar(*namesIt, nvarData)){
-//			return FAIL;
-//		}
-//		noffset--;
-//	}
-//	//_tables.push(newFuncTable);
-//	_tables.top()->addVar(funcName, newFuncData);
-//	_tables.push(newFuncVarsTable);
-//	return SUCCESS;
-//}
-
-
-
 SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType){
-	//TODO:[TIO]<-[NOAM] newArgs is now a map type with <type,name>.
 	IdType idt;
 	if (GetFunc(funcName, idt)){
 		return FAIL;
@@ -202,25 +207,6 @@ bool CompareVecs(vector<varType> &callArgs, vector<varType> &expectedArgs){
 	return false;
 }
 
-//SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret){
-//
-//	IdType funkyType;
-//	bool exist = GetFunc(name, funkyType);
-//	if (exist){
-//		expectedArgs = funkyType.args;
-//		ret = funkyType.retType;
-//		if (CompareVecs(callArgs,expectedArgs)){
-//			return SUCCESS;
-//		}
-//		else
-//		{
-//			return PROTOTYPE_MISMATCH;
-//		}
-//	}
-//	return NOT_DEFINED;
-//}
-
-
 SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &expectedArgs, varType &ret){
 
 	IdType funkyType;
@@ -264,7 +250,7 @@ bool SymbolTable::OpenScope(){
 bool SymbolTable::AddVar(string name, varType t){
 	IdType idt;
 	if (GetFunc(name, idt)){
-		return FAIL;
+		return false;
 	}
 	VarData vd;
 	IdType it;

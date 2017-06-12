@@ -25,10 +25,19 @@ typedef struct {
 	int offset;
 } VarData;
 
+typedef struct {
+	string name;
+	IdType t;
+	int offset;
+} TableEntry;
+
+typedef vector<TableEntry>::iterator TableIt;
+
 class Table {
 private:
-	map<string, VarData>* _vars;
-	
+	//map<string, VarData>* _vars;
+	vector<TableEntry>* _variables;
+
 	list<scopeType>* scopeList;
 public: 
 	Table* _parentTable;
@@ -36,6 +45,8 @@ public:
 	bool get(string varName, VarData& dat);
 	bool addVar(string name, VarData d);
 	bool contains(string name);
+	bool contains(string name, VarData &vd);
+	void printScope();
 	~Table();
 };
 
