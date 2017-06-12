@@ -48,8 +48,9 @@ Funcs : FuncDecl Funcs
 
 FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE M Statements RBRACE
            {
-                if($2.varName == MAIN && $4.formals.argTypes.size() == 0)
+                if($2.varName == MAIN && symbolTable->formalList.argTypes.size() == 0)
                     symbolTable->IsMainDefined = true;
+                symbolTable->FlushFormalList();
                 symbolTable->EndProg();
            }
     ;
@@ -96,7 +97,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     symbolTable->IsWhileOrIfScopeOpened = true;
                 }
                 symbolTable->IsWhileOrIfIntact = false;
-                if(!areEqualTypes($1,$4))
+                if(!areEqualTypes($1.type,$4.type))
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -115,7 +116,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
                     output::errorUndef(yylineno,$1.varName.c_str());
                     exit(0);
                 }
-                if(isByte(t) && isNumeric($3) && $3.numVal > MAXBYTE)
+                if(isByte(t) && isNumeric($3.type) && $3.numVal > MAXBYTE)
                 {
                     char* str = toString($3.numVal); //TODO: try to find a better inToString
                     output::errorByteTooLarge(yylineno,str);
@@ -135,7 +136,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
             RETURN Exp SC {$$.type = $2.type;} |
             IF LPAREN Exp RPAREN K Statement
             {
-                if(!isBoolean($3))
+                if(!isBoolean($3.type))
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -148,7 +149,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
             } |
             IF LPAREN Exp RPAREN K Statement ELSE K Statement
             {
-                if(!isBoolean($3))
+                if(!isBoolean($3.type))
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -161,7 +162,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
             } |
             WHILE LPAREN Exp RPAREN W Statement
             {
-                if(!isBoolean($3))
+                if(!isBoolean($3.type))
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -183,7 +184,7 @@ Statement : LBRACE M Statements RBRACE {symbolTable->EndProg();} |
             } |
             SWITCH LPAREN Exp RPAREN LBRACE CaseList RBRACE SC
             {
-                if(!isNumeric($3))
+                if(!isNumeric($3.type))
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -202,7 +203,7 @@ Call : ID LPAREN ExpList {symbolTable->FlushExpList();} RPAREN
         {
             if($1.varName == LIBPRINT)
             {
-                if((symbolTable->expList.size() != 1) || !isString(symbolTable->expList.back().type))
+                if((symbolTable->expList.size() != 1) || !isString(symbolTable->expList.back()))
                 {
                     std::vector<const char*> stringVec;
                     stringVec.push_back("string");
@@ -213,7 +214,7 @@ Call : ID LPAREN ExpList {symbolTable->FlushExpList();} RPAREN
             }
             else if($1.varName == LIBPRINTI)
             {
-                if((symbolTable->expList.size() != 1) || !isNumeric(symbolTable->expList.back().type))
+                if((symbolTable->expList.size() != 1) || !isNumeric(symbolTable->expList.back()))
                 {
                     std::vector<const char*> intVec;
                     intVec.push_back("int");
@@ -242,10 +243,9 @@ Call : ID LPAREN ExpList {symbolTable->FlushExpList();} RPAREN
         } |
         ID LPAREN RPAREN
         {
-            vector<varType> voidVec;
             vector<varType> expected;
             varType retType;
-            SymbolTableResult res = symbolTable->CallFunc($1.varName,voidVec,expected,retType);
+            SymbolTableResult res = symbolTable->CallFunc($1.varName,expected,retType);
             if(res == PROTOTYPE_MISMATCH)
             {
                 output::errorPrototypeMismatch(yylineno,$1.varName.c_str(),getTypeNames(expected));
@@ -297,7 +297,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       } |
       Exp AND Exp
       {
-            if(!isBoolean($1) || !areEqualTypes($1,$3))
+            if(!isBoolean($1.type) || !areEqualTypes($1.type,$3.type))
             {
                 //output::errorMismatch(yylineno);
                 exit(0);
@@ -307,7 +307,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       } |
       Exp OR Exp
       {
-            if(!isBoolean($1) || !areEqualTypes($1,$3))
+            if(!isBoolean($1.type) || !areEqualTypes($1.type,$3.type))
             {
                 output::errorMismatch(yylineno);
                 exit(0);
@@ -317,7 +317,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       } |
       Exp RELOP Exp
       {
-            if(!isNumeric($1) || !areEqualTypes($1,$3))
+            if(!isNumeric($1.type) || !areEqualTypes($1.type,$3.type))
             {
                 output::errorMismatch(yylineno);
                 exit(0);
@@ -326,7 +326,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       } |
       Exp BINOP Exp
       {
-            if(!isNumeric($1) || !isNumeric($3))
+            if(!isNumeric($1.type) || !isNumeric($3.type))
             {
                 output::errorMismatch(yylineno);
                 exit(0);
@@ -366,6 +366,5 @@ void addFunc(STYPE id, STYPE ret){
         output::errorDef(yylineno,id.varName.c_str());
         exit(0);
     }
-    symbolTable->FlushFormalList();
 }
 
