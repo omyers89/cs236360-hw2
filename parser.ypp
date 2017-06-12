@@ -47,11 +47,6 @@ Funcs : FuncDecl Funcs
 
 FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE M Statements RBRACE
            {
-                if($1.type != symbolTable->ReturnType)
-                {
-                    output::errorMismatch(yylineno);
-                    exit(0);
-                }
                 if($2.varName == MAIN && symbolTable->formalList.argTypes.size() == 0)
                     symbolTable->IsMainDefined = true;
                 symbolTable->FlushFormalList();
@@ -142,8 +137,22 @@ Statement : V LBRACE M Statements RBRACE {symbolTable->EndScope();} |
                 }
             } |
             Call SC {$$.type = $1.type;} |
-            RETURN SC {symbolTable->ReturnType = _VOID;} |
-            RETURN Exp SC {symbolTable->ReturnType = $2.type;} |
+            RETURN SC
+            {
+                if(symbolTable->ReturnType != _VOID)
+                {
+                    output::errorMismatch(yylineno);
+                    exit(0);
+                }
+            } |
+            RETURN Exp SC
+            {
+                if(symbolTable->ReturnType == _VOID)
+                {
+                    output::errorMismatch(yylineno);
+                    exit(0);
+                }
+            } |
             IF LPAREN Exp RPAREN K Statement
             {
                 if(!isBoolean($3.type))
@@ -390,5 +399,6 @@ void addFunc(STYPE id, STYPE ret){
         output::errorDef(yylineno,id.varName.c_str());
         exit(0);
     }
+    symbolTable->ReturnType = ret.type;
 }
 
