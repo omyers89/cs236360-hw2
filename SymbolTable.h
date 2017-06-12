@@ -88,7 +88,7 @@ public:
 	bool GetVar(string name, varType& outVarType); //return a reference to the object, or null and false otherwise
 
 	void AddToFormalList(string varName, varType type);
-	void AddToExpList(string varName, varType type);
+	void AddToExpList(varType type);
 	void FlushFormalList();
 	void FlushExpList();
 
