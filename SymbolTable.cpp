@@ -148,8 +148,13 @@ Table* Tables::get(int i){
 bool SymbolTable::EndScope(){
 	output::endScope();
 	Table* tmpT = _tables.top();
+	if (NULL == tmpT) { 
+		cout << "in EndScope: poping empty stack!" << endl;
+		return false; }
 	tmpT->printScope();
-	return _tables.pop() && _offsetes.pop();
+	bool t = _tables.pop();
+	bool o= _offsetes.pop();
+	return t && o;
 }
 
 
@@ -186,9 +191,10 @@ SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType){
 		}
 		noffset--;
 	}
-	//_tables.push(newFuncTable);
 	_tables.top()->addVar(funcName, newFuncData);
+	_offsetes.top() = 0;
 	_tables.push(newFuncVarsTable);
+	_offsetes.push();
 	return SUCCESS;
 }
 
