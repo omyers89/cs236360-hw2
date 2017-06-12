@@ -283,7 +283,7 @@ void SymbolTable::AddToFormalList(string varName, varType type){
 }
 
 void SymbolTable::AddToExpList(varType type){
-	expList.push_back(type);
+	expList.insert(expList.begin(),type);
 }
 
 void SymbolTable::FlushFormalList(){

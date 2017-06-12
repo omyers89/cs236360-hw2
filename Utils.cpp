@@ -21,7 +21,7 @@ bool isString(varType a){
 }
 
 bool areEqualTypes(varType a,varType b){
-    return a == b || (a == _INT && b == _BYTE) || (a == _BYTE && b == _INT);
+    return a == b || (a == _INT && b == _BYTE);
 }
 
 bool isNumeric(varType a){
@@ -40,7 +40,7 @@ const char* typeToString(varType vt){
 		break;		 
 	case (_INT) :	return "INT";
 		break;		 
-	case (_BYTE) :	return "INT";
+	case (_BYTE) :	return "BYTE";
 		break;		 
 	case (_STRING):	return "STRING";
 		break;		 

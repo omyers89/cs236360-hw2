@@ -47,16 +47,19 @@ Funcs : FuncDecl Funcs
 
 FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE Statements RBRACE
            {
-                if($2.varName == MAIN && symbolTable->formalList.argTypes.size() == 0)
+                if($1.type == _VOID && $2.varName == MAIN && symbolTable->formalList.argTypes.size() == 0)
                     symbolTable->IsMainDefined = true;
 				symbolTable->EndScope();
                 symbolTable->FlushFormalList();
                 symbolTable->ReturnType = _VOID;
-                
            }
     ;
 
-RetType : Type {$$.type = $1.type;} | VOID { $$.type = _VOID;}
+RetType : Type
+          {
+                $$.type = $1.type;
+          } |
+          VOID { $$.type = _VOID;}
     ;
 
 Formals : FormalsList | /*epsilon*/
@@ -91,7 +94,6 @@ Statement : V LBRACE M Statements RBRACE {symbolTable->EndScope();} |
                     exit(0);
                 }
                 symbolTable->AddVar($2.varName,$1.type);
-                $$.type = $3.type;
             } |
             Type ID ASSIGN Exp SC
             {
@@ -116,21 +118,22 @@ Statement : V LBRACE M Statements RBRACE {symbolTable->EndScope();} |
             } |
             ID ASSIGN Exp SC
             {
-                varType t;
-                if(!symbolTable->GetVar($1.varName,t))
+                varType out;
+                if(!symbolTable->GetVar($1.varName,out))
                 {
                     output::errorUndef(yylineno,$1.varName.c_str());
                     exit(0);
                 }
-                if(isByte(t) && isNumeric($3.type) && $3.numVal > MAXBYTE)
+                if(isByte(out) && isNumeric($3.type) && $3.numVal > MAXBYTE)
                 {
                     char* str = toString($3.numVal); //TODO: try to find a better intToString
                     output::errorByteTooLarge(yylineno,str);
                     free(str); //TODO: i'm crying
                     exit(0);
                 }
-                if(t == $3.type || (t == _INT && $3.type == _BYTE))
-                    $$.type = t;
+                if(out == $3.type || (out == _INT && $3.type == _BYTE))
+                    $$.type = out;
+
                 else
                 {
                     output::errorMismatch(yylineno);
@@ -148,7 +151,17 @@ Statement : V LBRACE M Statements RBRACE {symbolTable->EndScope();} |
             } |
             RETURN Exp SC
             {
-                if(symbolTable->ReturnType == _VOID)
+                if($2.type == _STRING)
+                {
+                    varType out;
+                    if(symbolTable->GetVar($2.varName,out))
+                        if(out != symbolTable->ReturnType)
+                        {
+                            output::errorMismatch(yylineno);
+                            exit(0);
+                        }
+                }
+                if(symbolTable->ReturnType != $2.type)
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -295,7 +308,12 @@ ExpList : Exp
           }
     ;
 
-Type : INT {$$.type = _INT;} | BYTE {$$.type = _BYTE;} | BOOL {$$.type = _BOOL;}
+Type : INT {$$.type = _INT;} | BYTE {$$.type = _BYTE;} | BOOL {$$.type = _BOOL;} |
+       STRING
+       {
+            output::errorMismatch(yylineno);
+            exit(0);
+       }
     ;
 
 Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
@@ -308,7 +326,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
                 output::errorUndef(yylineno,$1.varName.c_str());
                 exit(0);
             }
-            $$.type = type;
+            $$.type = _STRING;
       } |
       Call {$$.type = $1.type;} |
       NUM {$$.type = _INT; $$.numVal = $1.numVal;} |
@@ -395,6 +413,11 @@ int yyerror(char * message){
 }
 
 void addFunc(STYPE id, STYPE ret){
+    if(ret.type != _INT && ret.type != _BOOL && ret.type != _BYTE && ret.type != _VOID)
+    {
+        output::errorMismatch(yylineno);
+        exit(0);
+    }
     SymbolTableResult res = symbolTable->AddFunc(id.varName,ret.type);
     if(res == FAIL)
     {
@@ -403,4 +426,5 @@ void addFunc(STYPE id, STYPE ret){
     }
     symbolTable->ReturnType = ret.type;
 }
+
 
