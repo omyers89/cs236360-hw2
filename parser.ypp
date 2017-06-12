@@ -48,6 +48,11 @@ Funcs : FuncDecl Funcs
 
 FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE M Statements RBRACE
            {
+                if($1.type != $9.type)
+                {
+                    output::errorMismatch(yylineno);
+                    exit(0);
+                }
                 if($2.varName == MAIN && symbolTable->formalList.argTypes.size() == 0)
                     symbolTable->IsMainDefined = true;
                 symbolTable->FlushFormalList();
@@ -287,7 +292,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       FALSE {$$.type = _BOOL; $$.boolVal = $1.boolVal;} |
       NOT Exp
       {
-            if(!isBoolean($1))
+            if(!isBoolean($1.type))
             {
                 output::errorMismatch(yylineno);
                 exit(0);
