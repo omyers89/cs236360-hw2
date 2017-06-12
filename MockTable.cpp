@@ -118,12 +118,21 @@ void printArgs(varList &argNameTypes){
 }
 
 
-SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType, varList &argNameTypes){
+//SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType, varList &argNameTypes){
+//	cout << "in AddFunc:" << endl;
+//	cout << "	RetType is:" << newRetType << endl;
+//	cout << "	in args are:" << endl;
+//	printArgs(argNameTypes);
+//
+//}
+
+
+SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType){
 	cout << "in AddFunc:" << endl;
 	cout << "	RetType is:" << newRetType << endl;
 	cout << "	in args are:" << endl;
-	printArgs(argNameTypes);
-
+	printArgs(formalList);
+	return SUCCESS;
 }
 
 bool CompareVecs(vector<varType> &callArgs, vector<varType> &expectedArgs){
@@ -141,14 +150,26 @@ bool CompareVecs(vector<varType> &callArgs, vector<varType> &expectedArgs){
 	return false;
 }
 
-SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret){
+//SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret){
+//	cout << "in CallFunc:" << endl;
+//	cout << "	callArgs are:" << endl;
+//	vector<varType>::iterator it = callArgs.begin();
+//	for (; it != callArgs.end(); it++){
+//		cout << *it << ", ";
+//	}
+//}
+
+
+SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &expectedArgs, varType &ret){
 	cout << "in CallFunc:" << endl;
 	cout << "	callArgs are:" << endl;
-	vector<varType>::iterator it = callArgs.begin();
-	for (; it != callArgs.end(); it++){
+	vector<varType>::iterator it = formalList.argTypes.begin();
+	for (; it != formalList.argTypes.end(); it++){
 		cout << *it << ", ";
 	}
+	return SUCCESS;
 }
+
 
 bool SymbolTable::GetFunc(string name, IdType &funType){
 	Table* curTable = _tables.top();
@@ -201,4 +222,32 @@ bool SymbolTable::GetVar(string name, varType& outVarType){
 	bool ex = GetFunc(name, idt);
 	outVarType = idt.retType;
 	return ex;*/
+}
+
+void SymbolTable::AddToFormalList(string varName, varType type){
+	cout << "in AddToFormalList:" << endl;
+	cout << "	name is:" << varName << endl;
+	cout << "	Type is:" << type << endl;
+
+		//return true;
+	}
+void SymbolTable::AddToExpList(string varName, varType type){
+	cout << "in AddToExpList:" << endl;
+	cout << "	name is:" << varName << endl;
+	cout << "	Type is:" << type << endl;
+}
+void SymbolTable::FlushFormalList(){
+	cout << "in FlushFormalList:" << endl;
+	cout << "FormalList is:" << endl;
+	printArgs(formalList);
+}
+void SymbolTable::FlushExpList(){
+	cout << "in FlushExpList:" << endl;
+	cout << "ExpList is:" << endl;
+
+	vector<varType>::iterator it = expList.begin();
+	for (; it != expList.end(); it++){
+		cout << *it << ", ";
+	}
+
 }

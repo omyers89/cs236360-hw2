@@ -63,24 +63,36 @@ private:
 	Offsets _offsetes;
 	
 	bool GetFunc(string name, IdType &funType);
+	
 public:
 	//bool findVarByName(string name);
 	bool IsMainDefined;
 	int WhileCount;
 	bool IsWhileOrIfIntact;
 	bool IsWhileOrIfScopeOpened;
+	varList formalList;
+	vector<varType> expList;
+
 	SymbolTable() :IsMainDefined(false), 
 					WhileCount(0),
 					IsWhileOrIfIntact(false),
 					IsWhileOrIfScopeOpened(false){ OpenScope(); };
 	bool EndProg(); //just pop tables and offsets
-	SymbolTableResult AddFunc(string name, varType retType, varList &argNameTypes);
-	SymbolTableResult CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret);
+	//SymbolTableResult AddFunc(string name, varType retType, varList &argNameTypes);
+	SymbolTableResult AddFunc(string name, varType retType);
+	//SymbolTableResult CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret);
+	SymbolTableResult CallFunc(string name, vector<varType> &expectedArgs, varType &ret);
 
 	bool OpenScope();//make new table, add to tables and update offsets
 	bool AddVar(string name, varType t); //insert at top table (name, tyoe, offset), and update offset
 	bool GetVar(string name, varType& outVarType); //return a reference to the object, or null and false otherwise
-	//bool UpdateVar(string name, VarData newData);
+
+	void AddToFormalList(string varName, varType type);
+	void AddToExpList(string varName, varType type);
+	void FlushFormalList();
+	void FlushExpList();
+
+
 };
 
 #endif //_TABLES_H_
