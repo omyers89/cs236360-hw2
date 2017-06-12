@@ -108,7 +108,45 @@ bool SymbolTable::EndProg(){
 
 
 
-SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType, varList &argNameTypes){
+//SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType, varList &argNameTypes){
+//	//TODO:[TIO]<-[NOAM] newArgs is now a map type with <type,name>.
+//	IdType idt;
+//	if (GetFunc(funcName, idt)){
+//		return FAIL;
+//	}
+//	IdType newIdType;
+//	newIdType.retType = newRetType;
+//	newIdType.args = argNameTypes.argTypes;
+//	
+//	VarData newFuncData;
+//	newFuncData.t = newIdType;
+//	newFuncData.offset = 0;
+//		
+//	//Table* newFuncTable = new Table(_tables.top(), _FUNC);
+//	Table* newFuncVarsTable = new Table(_tables.top(), _FUNC);
+//	vector<string>::iterator namesIt = argNameTypes.argNames.begin();
+//	vector<varType>::iterator typesIt = argNameTypes.argTypes.begin();
+//	int noffset = 0;
+//	for (; namesIt != argNameTypes.argNames.end(); namesIt++, typesIt++){
+//		IdType nRetType;
+//		nRetType.retType = *typesIt;
+//		VarData nvarData;
+//		nvarData.t = nRetType;
+//		nvarData.offset = noffset;
+//		if (!newFuncVarsTable->addVar(*namesIt, nvarData)){
+//			return FAIL;
+//		}
+//		noffset--;
+//	}
+//	//_tables.push(newFuncTable);
+//	_tables.top()->addVar(funcName, newFuncData);
+//	_tables.push(newFuncVarsTable);
+//	return SUCCESS;
+//}
+
+
+
+SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType){
 	//TODO:[TIO]<-[NOAM] newArgs is now a map type with <type,name>.
 	IdType idt;
 	if (GetFunc(funcName, idt)){
@@ -116,18 +154,20 @@ SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType, varL
 	}
 	IdType newIdType;
 	newIdType.retType = newRetType;
-	newIdType.args = argNameTypes.argTypes;
-	
+	vector<varType>::iterator it = formalList.argTypes.begin();
+	for (; it != formalList.argTypes.end(); it++){
+		newIdType.args.push_back(*it);
+	}
 	VarData newFuncData;
 	newFuncData.t = newIdType;
 	newFuncData.offset = 0;
-		
+
 	//Table* newFuncTable = new Table(_tables.top(), _FUNC);
 	Table* newFuncVarsTable = new Table(_tables.top(), _FUNC);
-	vector<string>::iterator namesIt = argNameTypes.argNames.begin();
-	vector<varType>::iterator typesIt = argNameTypes.argTypes.begin();
+	vector<string>::iterator namesIt = formalList.argNames.begin();
+	vector<varType>::iterator typesIt = formalList.argTypes.begin();
 	int noffset = 0;
-	for (; namesIt != argNameTypes.argNames.end(); namesIt++, typesIt++){
+	for (; namesIt != formalList.argNames.end(); namesIt++, typesIt++){
 		IdType nRetType;
 		nRetType.retType = *typesIt;
 		VarData nvarData;
@@ -159,14 +199,33 @@ bool CompareVecs(vector<varType> &callArgs, vector<varType> &expectedArgs){
 	return false;
 }
 
-SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret){
+//SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &callArgs, vector<varType> &expectedArgs, varType &ret){
+//
+//	IdType funkyType;
+//	bool exist = GetFunc(name, funkyType);
+//	if (exist){
+//		expectedArgs = funkyType.args;
+//		ret = funkyType.retType;
+//		if (CompareVecs(callArgs,expectedArgs)){
+//			return SUCCESS;
+//		}
+//		else
+//		{
+//			return PROTOTYPE_MISMATCH;
+//		}
+//	}
+//	return NOT_DEFINED;
+//}
+
+
+SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &expectedArgs, varType &ret){
 
 	IdType funkyType;
 	bool exist = GetFunc(name, funkyType);
 	if (exist){
 		expectedArgs = funkyType.args;
 		ret = funkyType.retType;
-		if (CompareVecs(callArgs,expectedArgs)){
+		if (CompareVecs(expList,expectedArgs)){
 			return SUCCESS;
 		}
 		else
@@ -221,7 +280,21 @@ bool SymbolTable::GetVar(string name, varType& outVarType){
 }
 
 
-//bool SymbolTable::UpdateVar(string name, VarData newData){
-//	cout << "in UpdateVar:" << endl;
-//	return true;
-//}
+
+void SymbolTable::AddToFormalList(string varName, varType type){
+	formalList.argNames.push_back(varName);
+	formalList.argTypes.push_back(type);
+}
+
+void SymbolTable::AddToExpList(varType type){
+	expList.push_back(type);
+}
+
+void SymbolTable::FlushFormalList(){
+	formalList.argNames.clear();
+	formalList.argTypes.clear();
+}
+
+void SymbolTable::FlushExpList(){
+	expList.clear();
+}
