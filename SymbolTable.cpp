@@ -104,7 +104,7 @@ Table* Tables::get(int i){
 bool SymbolTable::EndScope(){
 
 
-
+	output::endScope();
 	return _tables.pop() && _offsetes.pop();
 }
 

@@ -5,8 +5,8 @@
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <map>
+#include "output.hpp"
 
 using namespace std;
 

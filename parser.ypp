@@ -1,7 +1,6 @@
 %{
 	#include "Contracts.hpp"
 	#include "Utils.hpp"
-	#include "output.hpp"
 	#include "SymbolTable.h"
 	#include <iostream>
 	#include <stdlib.h>
