@@ -36,15 +36,15 @@ char * toString(int num){
 const char* typeToString(varType vt){
 	switch (vt)
 	{
-	case (_BOOL) :	return "bool";
+	case (_BOOL) :	return "BOOL";
 		break;		 
-	case (_INT) :	return "int";
+	case (_INT) :	return "INT";
 		break;		 
-	case (_BYTE) :	return "byte";
+	case (_BYTE) :	return "INT";
 		break;		 
-	case (_STRING):	return "string";
+	case (_STRING):	return "STRING";
 		break;		 
-	case (_VOID) :	return "void";
+	case (_VOID) :	return "VOID";
 		break;
 	default:
 		return "";

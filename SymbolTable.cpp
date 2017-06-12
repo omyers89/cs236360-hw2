@@ -146,6 +146,7 @@ Table* Tables::get(int i){
 
 
 bool SymbolTable::EndScope(){
+	cout << "table stack size is:" << _tables._tableStack.size() << endl;
 	output::endScope();
 	Table* tmpT = _tables.top();
 	if (NULL == tmpT) { 
@@ -153,7 +154,7 @@ bool SymbolTable::EndScope(){
 		return false; }
 	tmpT->printScope();
 	bool t = _tables.pop();
-	bool o= _offsetes.pop();
+	bool o = _offsetes.pop();
 	return t && o;
 }
 
@@ -179,7 +180,7 @@ SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType){
 	Table* newFuncVarsTable = new Table(_tables.top(), _FUNC);
 	vector<string>::iterator namesIt = formalList.argNames.begin();
 	vector<varType>::iterator typesIt = formalList.argTypes.begin();
-	int noffset = 0;
+	int noffset = -1;
 	for (; namesIt != formalList.argNames.end(); namesIt++, typesIt++){
 		IdType nRetType;
 		nRetType.retType = *typesIt;
