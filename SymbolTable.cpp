@@ -101,7 +101,10 @@ Table* Tables::get(int i){
 }
 
 
-bool SymbolTable::EndProg(){
+bool SymbolTable::EndScope(){
+
+
+
 	return _tables.pop() && _offsetes.pop();
 }
 
