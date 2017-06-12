@@ -35,7 +35,7 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 <LN_COMM>\n      { 
                   *s = 0;
                   BEGIN 0;
-                  showToken("%d %s %s\n", yylineno-1, "LN_COMMENT", buf);
+                  showToken("LN_COMMENT");
                 }
 <LN_COMM>.    { *s++ = *yytext; }
 
@@ -45,7 +45,7 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
                   *s++ = '/';
                   *s = 0;
                   BEGIN 0;
-                  showToken("%d %s %s\n", yylineno, "BK_COMMENT", buf);
+                  showToken("BK_COMMENT");
                 }
 
 <BK_COMM>"EOF"    { showToken("Error unclosed block comment\n"); exit(0);}
