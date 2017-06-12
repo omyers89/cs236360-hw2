@@ -75,11 +75,13 @@ public:
 	bool IsWhileOrIfScopeOpened;
 	varList formalList;
 	vector<varType> expList;
+	varType ReturnType;
 
 	SymbolTable() :IsMainDefined(false), 
 					WhileCount(0),
 					IsWhileOrIfIntact(false),
-					IsWhileOrIfScopeOpened(false){ OpenScope(); };
+					IsWhileOrIfScopeOpened(false),
+					ReturnType(_VOID){ OpenScope(); };
 	bool EndProg(); //just pop tables and offsets
 	//SymbolTableResult AddFunc(string name, varType retType, varList &argNameTypes);
 	SymbolTableResult AddFunc(string name, varType retType);
