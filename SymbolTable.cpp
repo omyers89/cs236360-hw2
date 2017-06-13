@@ -5,6 +5,10 @@
 
 using namespace std;
 
+
+bool GDBG = false;
+#define DEBUG(obj) {if (GDBG) {cout << obj << endl;}}
+
 Table::Table(Table* parentTable, scopeType newScopeType) : _parentTable(parentTable)
 {
 	//_vars = new(map<string, VarData>);
@@ -78,6 +82,7 @@ void Table::printScope(){
 		return;
 	}
 	TableIt it = _variables->begin();
+	//TODO: make sure function prints brackets;
 	for (; it != _variables->end(); it++){
 		if (it->t.args.size() > 0){
 			string funStrType = output::makeFunctionType(typeToString(it->t.retType),
@@ -99,6 +104,10 @@ void Offsets::push()
 	}
 	else { curOffset = _offsetsStack.top(); }
 	_offsetsStack.push(curOffset);
+	DEBUG("ofset_push-size is: ");
+	DEBUG((_offsetsStack.size()));
+	DEBUG("ofset_push-top is: ");
+	DEBUG((_offsetsStack.top()));
 }
 
 bool Offsets::pop(){
@@ -112,7 +121,8 @@ bool Offsets::pop(){
 
 int& Offsets::top(){
 	if (_offsetsStack.size() == 0){
-		throw exception::exception();
+		DEBUG("size is 0: ");
+		throw exception();
 	}
 	return _offsetsStack.top();
 }
@@ -153,9 +163,20 @@ bool SymbolTable::EndScope(){
 		cout << "in EndScope: poping empty stack!" << endl;
 		return false; }
 	tmpT->printScope();
+	DEBUG("scope ended: ");
+	DEBUG((_offsetes._offsetsStack.size()));
 	bool t = _tables.pop();
 	bool o = _offsetes.pop();
+	
 	return t && o;
+}
+
+bool SymbolTable::EndProg(){
+
+	DEBUG("End pro called ended: ");
+	DEBUG((_offsetes._offsetsStack.size()));
+	EndScope();
+	return true;
 }
 
 
@@ -194,8 +215,13 @@ SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType){
 	}
 	_tables.top()->addVar(funcName, newFuncData);
 	_offsetes.top() = 0;
+	DEBUG("function added to scope : ");
+	DEBUG((_tables._tableStack.size()));
 	_tables.push(newFuncVarsTable);
 	_offsetes.push();
+
+	DEBUG("new funcScope at : ");
+	DEBUG((_tables._tableStack.size()));
 	return SUCCESS;
 }
 
@@ -251,6 +277,11 @@ bool SymbolTable::OpenScope(){
 	Table* nt = new Table(_tables.top());
 	_tables.push(nt);
 	_offsetes.push();
+
+	DEBUG("opened scope- cur scope is _offsetes: ");
+	DEBUG((_offsetes._offsetsStack.size()));
+	DEBUG("opened scope- cur scope is  _tables: ");
+	DEBUG((_tables._tableStack.size()));
 	return true;
 }
 

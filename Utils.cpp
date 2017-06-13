@@ -40,7 +40,7 @@ const char* typeToString(varType vt){
 		break;		 
 	case (_INT) :	return "INT";
 		break;		 
-	case (_BYTE) :	return "INT";
+	case (_BYTE) :	return "BYTE";
 		break;		 
 	case (_STRING):	return "STRING";
 		break;		 
