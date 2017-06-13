@@ -55,6 +55,9 @@ std::vector<const char*> getTypeNames(std::vector<varType> vec){
     std::vector<const char*> ret;
     for(int i=0;i<vec.size();++i)
     {
+		if (vec[i] == _NO_ARGS){
+			continue;
+		}
 		ret.push_back(typeToString(vec[i]));
     }
     return ret;

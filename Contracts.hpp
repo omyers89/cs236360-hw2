@@ -10,7 +10,7 @@
 
 using namespace std;
 
-typedef enum{_VOID, _BOOL, _INT, _BYTE, _STRING} varType;
+typedef enum{_VOID, _BOOL, _INT, _BYTE, _STRING, _NO_ARGS} varType;
 typedef enum{_FUNC, _IF, _WHILE, _CASE, _NEST} scopeType;
 
 

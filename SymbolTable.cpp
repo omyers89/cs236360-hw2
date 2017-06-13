@@ -193,6 +193,9 @@ SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType){
 	for (; it != formalList.argTypes.end(); it++){
 		newIdType.args.push_back(*it);
 	}
+	if (newIdType.args.size() == 0){
+		newIdType.args.push_back(_NO_ARGS);
+	}
 	VarData newFuncData;
 	newFuncData.t = newIdType;
 	newFuncData.offset = 0;
