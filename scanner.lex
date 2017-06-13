@@ -150,7 +150,7 @@ null                       {    showToken("NULL");      return NULL;}
                                     return STRING;
                                }
 
-<<EOF>>		{showToken("EOF"); exit(1);}
+<<EOF>>		{showToken("EOF"); return EOFF; }
 .		            printErr();
 
 %%

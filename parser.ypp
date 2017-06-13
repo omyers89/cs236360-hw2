@@ -14,7 +14,7 @@
 	SymbolTable* symbolTable;
 %}
 
-%token VOID INT BYTE B BOOL TRUE FALSE RETURN IF WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN LBRACE RBRACE ID NUM STRING
+%token VOID INT BYTE B BOOL TRUE FALSE RETURN IF WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN LBRACE RBRACE ID NUM STRING EOFF
 
 %nonassoc RPAREN /* solving dangling-else problem */
 %nonassoc ELSE /* solving dangling-else problem */
@@ -28,31 +28,32 @@
 
 %%
 
+S : M Program EOFF {symbolTable->EndProg(); exit(1);}
+;
+
 Program	: Funcs
           {
+			
             if(!symbolTable->IsMainDefined)
             {
                 output::errorMainMissing();
                 exit(0);
             }
-            symbolTable->EndScope();
+            
           }
 	;
 
-Funcs : FuncDecl Funcs
-        {
-
-        } | /*epsilon*/
+Funcs : FuncDecl Funcs | /*epsilon*/
 	;
 
-FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE Statements RBRACE
+FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE V Statements RBRACE
            {
                 if($1.type != symbolTable->ReturnType)
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
                 }
-                if($2.varName == MAIN && symbolTable->formalList.argTypes.size() == 0)
+                if(($2.varName == MAIN) && (symbolTable->formalList.argTypes.size() == 0) && ($1.type == _VOID))
                     symbolTable->IsMainDefined = true;
 				symbolTable->EndScope();
                 symbolTable->FlushFormalList();
@@ -102,6 +103,7 @@ Statement : V LBRACE M Statements RBRACE {symbolTable->EndScope();} |
             {
                 if(symbolTable->IsWhileOrIfIntact)
                 {
+					
                     symbolTable->OpenScope();
                     symbolTable->IsWhileOrIfScopeOpened = true;
                 }
@@ -359,6 +361,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
 
 M : { symbolTable->OpenScope();}
     ;
+
 
 
 W : {
