@@ -21,7 +21,7 @@ bool isString(varType a){
 }
 
 bool areEqualTypes(varType a,varType b){
-    return a == b || (a == _INT && b == _BYTE) || (a == _BYTE && b == _INT);
+    return a == b || (a == _INT && b == _BYTE);
 }
 
 bool isNumeric(varType a){
