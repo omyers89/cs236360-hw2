@@ -327,7 +327,7 @@ Call : ID LPAREN ExpList RPAREN
 				//std::cout << "expected is:" << retType << std::endl; 
                 $$.type = retType;
 				$1.type = retType;
-                symbolTable->FlushExpList();
+                symbolTable->FlushExpList(expected.size());
             }
         } |
         ID LPAREN RPAREN
