@@ -103,7 +103,6 @@ asciiTrailer    ({digit}{digit}{digit}{digit})
 "switch"                   {   showToken("SWITCH");     return SWITCH;}
 "case"                     { showToken("CASE");     return CASE;}
 "break"                    {  showToken("BREAK");     return BREAK;}
-"string"                    { showToken("STRINGTYPE");     return STRINGTYPE;};
 \:                         { showToken("COLON");     return COLON;}
 \;                         {    showToken("SC");     return SC;}
 \,                         {    showToken("COMMA");     return COMMA;}

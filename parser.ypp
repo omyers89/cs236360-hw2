@@ -12,6 +12,7 @@
 	void addFunc(STYPE id, STYPE ret);
 	extern int yylineno;
 	SymbolTable* symbolTable;
+	bool isAnyFuncDefined;
 %}
 
 %token VOID INT BYTE B BOOL STRINGTYPE TRUE FALSE RETURN IF WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN LBRACE RBRACE ID NUM STRING EOFF
@@ -43,11 +44,12 @@ Program	: Funcs
           }
 	;
 
-Funcs : FuncDecl Funcs | /*epsilon*/
+Funcs : FuncDecl Funcs | {if(!isAnyFuncDefined) {output::errorSyn(yylineno);exit(0);}}
 	;
 
 FuncDecl : RetType ID LPAREN Formals RPAREN {addFunc($2,$1);} LBRACE V Statements RBRACE
            {
+                isAnyFuncDefined = true;
                 if($1.type != symbolTable->ReturnType)
                 {
                     output::errorMismatch(yylineno);
@@ -335,12 +337,8 @@ ExpList : Exp
           }
     ;
 
-Type : INT {$$.type = _INT;} | BYTE {$$.type = _BYTE;} | BOOL {$$.type = _BOOL;} |
-       STRINGTYPE
-       {
-            output::errorSyn(yylineno);
-            exit(0);
-       }
+Type : INT {$$.type = _INT;} | BYTE {$$.type = _BYTE;} | BOOL {$$.type = _BOOL;}
+
     ;
 
 Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
@@ -354,6 +352,7 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
                 exit(0);
             }
             $$.type = _STRING;
+            $$.varName = $1.varName;
       } |
       Call {$$.type = $1.type;} |
       NUM {$$.type = _INT; $$.numVal = $1.numVal; $$.varName="";} |
@@ -433,6 +432,7 @@ V : {symbolTable->IsWhileOrIfIntact = false;}
 
 int main(){
 	symbolTable = new SymbolTable();
+	isAnyFuncDefined = false;
 	yyparse();
 }
 
