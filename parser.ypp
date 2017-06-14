@@ -287,7 +287,7 @@ Call : ID LPAREN ExpList RPAREN
                 if((symbolTable->expList.size() != 1) || !isString(symbolTable->expList.back()))
                 {
                     std::vector<const char*> stringVec;
-                    stringVec.push_back("string");
+                    stringVec.push_back("STRING");
                     output::errorPrototypeMismatch(yylineno,LIBPRINT,stringVec);
                     exit(0);
                 }
@@ -299,8 +299,8 @@ Call : ID LPAREN ExpList RPAREN
                 if((symbolTable->expList.size() != 1) || !isNumeric(symbolTable->expList.back()))
                 {
                     std::vector<const char*> intVec;
-                    intVec.push_back("int");
-                    output::errorPrototypeMismatch(yylineno,LIBPRINT,intVec);
+                    intVec.push_back("INT");
+                    output::errorPrototypeMismatch(yylineno,LIBPRINTI,intVec);
                     exit(0);
                 }
                 $$.type = _VOID;
@@ -321,7 +321,7 @@ Call : ID LPAREN ExpList RPAREN
                 }
                 if(res == NOT_DEFINED)
                 {
-                    output::errorUndef(yylineno,$1.varName.c_str());
+                    output::errorUndefFunc(yylineno,$1.varName.c_str());
                     exit(0);
                 }
 				//std::cout << "expected is:" << retType << std::endl; 
