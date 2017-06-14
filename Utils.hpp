@@ -11,7 +11,7 @@ bool areEqualTypes(varType a,varType b);
 bool isBoolean(varType a);
 bool isNumeric(varType a);
 bool isString(varType a);
-bool isInt(STYPE a);
+bool isInt(varType a);
 bool isByte(varType a);
 bool validateFunc(std::vector<varType,string> argV,std::vector<varType> expV);
 char* toString(int num);

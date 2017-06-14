@@ -14,7 +14,7 @@
 	SymbolTable* symbolTable;
 %}
 
-%token VOID INT BYTE B BOOL TRUE FALSE RETURN IF WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN LBRACE RBRACE ID NUM STRING EOFF
+%token VOID INT BYTE B BOOL STRINGTYPE TRUE FALSE RETURN IF WHILE SWITCH CASE BREAK COLON SC COMMA LPAREN LBRACE RBRACE ID NUM STRING EOFF
 
 %nonassoc RPAREN /* solving dangling-else problem */
 %nonassoc ELSE /* solving dangling-else problem */
@@ -103,6 +103,8 @@ Statement : V LBRACE M Statements RBRACE {symbolTable->EndScope();} |
             } |
             Type ID ASSIGN Exp SC
             {
+                varType outExp;
+                bool resExp = symbolTable->GetVar($4.varName,outExp);
                 if(symbolTable->IsWhileOrIfIntact)
                 {
 					
@@ -110,11 +112,23 @@ Statement : V LBRACE M Statements RBRACE {symbolTable->EndScope();} |
                     symbolTable->IsWhileOrIfScopeOpened = true;
                 }
                 symbolTable->IsWhileOrIfIntact = false;
-                if(!areEqualTypes($1.type,$4.type))
+                if(resExp)
                 {
-                    output::errorMismatch(yylineno);
-                    exit(0);
+                    if(isInt($1.type) && !isNumeric(outExp) || !areEqualTypes($1.type,outExp))
+                    {
+                        output::errorMismatch(yylineno);
+                        exit(0);
+                    }
                 }
+                else
+                {
+                    if(isInt($1.type) && !isNumeric($4.type) || !areEqualTypes($1.type,$4.type))
+                    {
+                        output::errorMismatch(yylineno);
+                        exit(0);
+                    }
+                }
+
                 varType out;
                 if(symbolTable->GetVar($2.varName,out))
                 {
@@ -125,27 +139,41 @@ Statement : V LBRACE M Statements RBRACE {symbolTable->EndScope();} |
             } |
             ID ASSIGN Exp SC
             {
-                varType out;
-                if(!symbolTable->GetVar($1.varName,out))
+                varType outId;
+                varType outExp;
+                bool resExp = symbolTable->GetVar($3.varName,outExp);
+                bool resId = symbolTable->GetVar($1.varName,outId);
+                if(!resId)
                 {
                     output::errorUndef(yylineno,$1.varName.c_str());
                     exit(0);
                 }
-                if(isByte(out) && isNumeric($3.type) && $3.numVal > MAXBYTE)
+                if(resExp)
                 {
-                    char* str = toString($3.numVal); //TODO: try to find a better intToString
+                    bool intAndByte = (isInt(outId) && isByte(outExp)) || (isByte(outId) && isByte(outExp));
+                    if(outId != outExp && !intAndByte)
+                    {
+                        output::errorMismatch(yylineno);
+                        exit(0);
+                    }
+                }
+                else
+                {
+                    bool intAndByte = (isInt(outId) && isByte($3.type)) || (isByte(outId) && isByte($3.type));
+                    if(outId != $3.type && !intAndByte)
+                    {
+                        output::errorMismatch(yylineno);
+                        exit(0);
+                    }
+                }
+                if(isByte(outId) && isNumeric($3.type) && $3.numVal > MAXBYTE)
+                {
+                    char* str = toString($4.numVal); //TODO: try to find a better intToString
                     output::errorByteTooLarge(yylineno,str);
                     free(str); //TODO: i'm crying
                     exit(0);
                 }
-                if(out == $3.type || (out == _INT && $3.type == _BYTE))
-                    $$.type = out;
 
-                else
-                {
-                    output::errorMismatch(yylineno);
-                    exit(0);
-                }
             } |
             Call SC {$$.type = $1.type;} |
             RETURN SC
@@ -158,17 +186,9 @@ Statement : V LBRACE M Statements RBRACE {symbolTable->EndScope();} |
             } |
             RETURN Exp SC
             {
-                if($2.type == _STRING)
-                {
-                    varType out;
-                    if(symbolTable->GetVar($2.varName,out))
-                        if(out != symbolTable->ReturnType)
-                        {
-                            output::errorMismatch(yylineno);
-                            exit(0);
-                        }
-                }
-                if(symbolTable->ReturnType != $2.type)
+                varType outType;
+                bool resExp = symbolTable->GetVar($2.varName,outType);
+                if(symbolTable->ReturnType == _VOID || (resExp && symbolTable->ReturnType != outType) || (!resExp && symbolTable->ReturnType != $2.type))
                 {
                     output::errorMismatch(yylineno);
                     exit(0);
@@ -316,9 +336,9 @@ ExpList : Exp
     ;
 
 Type : INT {$$.type = _INT;} | BYTE {$$.type = _BYTE;} | BOOL {$$.type = _BOOL;} |
-       STRING
+       STRINGTYPE
        {
-            output::errorMismatch(yylineno);
+            output::errorSyn(yylineno);
             exit(0);
        }
     ;
@@ -336,11 +356,11 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
             $$.type = _STRING;
       } |
       Call {$$.type = $1.type;} |
-      NUM {$$.type = _INT; $$.numVal = $1.numVal;} |
-      NUM B {$$.type = _BYTE; $$.numVal = $1.numVal;} |
-      STRING {$$.type = _STRING; $$.stringVal = $1.stringVal;} |
-      TRUE {$$.type = _BOOL; $$.boolVal = $1.boolVal;} |
-      FALSE {$$.type = _BOOL; $$.boolVal = $1.boolVal;} |
+      NUM {$$.type = _INT; $$.numVal = $1.numVal; $$.varName="";} |
+      NUM B {$$.type = _BYTE; $$.numVal = $1.numVal; $$.varName="";} |
+      STRING {$$.type = _STRING; $$.stringVal = $1.stringVal; $$.varName="";} |
+      TRUE {$$.type = _BOOL; $$.boolVal = $1.boolVal; $$.varName="";} |
+      FALSE {$$.type = _BOOL; $$.boolVal = $1.boolVal; $$.varName="";} |
       NOT Exp
       {
             if(!isBoolean($1.type))
@@ -407,6 +427,7 @@ K : { symbolTable->IsWhileOrIfIntact = true;}
 
 V : {symbolTable->IsWhileOrIfIntact = false;}
     ;
+
 
 %%
 
