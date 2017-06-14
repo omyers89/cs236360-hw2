@@ -1,4 +1,3 @@
-
 #include "SymbolTable.h"
 #include "Utils.hpp"
 #include <exception>
@@ -9,28 +8,27 @@ using namespace std;
 bool GDBG = false;
 #define DEBUG(obj) {if (GDBG) {cout << obj << endl;}}
 
-Table::Table(Table* parentTable, scopeType newScopeType) : _parentTable(parentTable)
+Table::Table(Table* parentTable) : _parentTable(parentTable)
 {
 	//_vars = new(map<string, VarData>);
 	_variables = new(vector<TableEntry>);
-	scopeList = new (list<scopeType>);
 }
 
 Table::~Table()
 {
 	delete(_variables);
-	delete(scopeList);
+	//delete(scopeList);
 }
 
 bool Table::get(string varName, VarData& dat){
-	
+
 	if (!contains(varName, dat)){
 		return false;
 	}
 	return true;
 }
 
-bool Table::addVar(string name, VarData d)
+bool Table::addVar(string name, VarData d, bool isfunc)
 {
 	if (contains(name))
 	{
@@ -40,6 +38,7 @@ bool Table::addVar(string name, VarData d)
 	tmpTent.name = name;
 	tmpTent.offset = d.offset;
 	tmpTent.t = d.t;
+	tmpTent.isFunc = isfunc;
 	_variables->push_back(tmpTent);
 	return true;
 }
@@ -84,7 +83,7 @@ void Table::printScope(){
 	TableIt it = _variables->begin();
 	//TODO: make sure function prints brackets;
 	for (; it != _variables->end(); it++){
-		if (it->t.args.size() > 0){
+		if (it->isFunc){
 			string funStrType = output::makeFunctionType(typeToString(it->t.retType),
 				getTypeNames(it->t.args));
 			output::printID((it->name).c_str(), it->offset, funStrType.c_str());
@@ -159,15 +158,16 @@ bool SymbolTable::EndScope(){
 	//cout << "table stack size is:" << _tables._tableStack.size() << endl;
 	output::endScope();
 	Table* tmpT = _tables.top();
-	if (NULL == tmpT) { 
+	if (NULL == tmpT) {
 		cout << "in EndScope: poping empty stack!" << endl;
-		return false; }
+		return false;
+	}
 	tmpT->printScope();
 	DEBUG("scope ended: ");
 	DEBUG((_offsetes._offsetsStack.size()));
 	bool t = _tables.pop();
 	bool o = _offsetes.pop();
-	
+
 	return t && o;
 }
 
@@ -193,15 +193,12 @@ SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType){
 	for (; it != formalList.argTypes.end(); it++){
 		newIdType.args.push_back(*it);
 	}
-	/*if (newIdType.args.size() == 0){
-		newIdType.args.push_back(_NO_ARGS);
-	}*/
 	VarData newFuncData;
 	newFuncData.t = newIdType;
 	newFuncData.offset = 0;
 
 	//Table* newFuncTable = new Table(_tables.top(), _FUNC);
-	Table* newFuncVarsTable = new Table(_tables.top(), _FUNC);
+	Table* newFuncVarsTable = new Table(_tables.top());
 	vector<string>::iterator namesIt = formalList.argNames.begin();
 	vector<varType>::iterator typesIt = formalList.argTypes.begin();
 	int noffset = -1;
@@ -216,7 +213,7 @@ SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType){
 		}
 		noffset--;
 	}
-	_tables.top()->addVar(funcName, newFuncData);
+	_tables.top()->addVar(funcName, newFuncData, true);
 	_offsetes.top() = 0;
 	DEBUG("function added to scope : ");
 	DEBUG((_tables._tableStack.size()));
@@ -231,10 +228,6 @@ SymbolTableResult SymbolTable::AddFunc(string funcName, varType newRetType){
 bool CompareVecs(vector<varType> &callArgs, vector<varType> &expectedArgs){
 	vector<varType>::iterator it_c = callArgs.begin();
 	vector<varType>::iterator it_e = expectedArgs.begin();
-	/*if (callArgs.size() == 0){
-		callArgs.push_back(_NO_ARGS);
-	}*/
-
 	while (it_c != callArgs.end() && it_e != expectedArgs.end())
 	{
 		if (*it_c != *it_e){ return false; }
@@ -254,7 +247,7 @@ SymbolTableResult SymbolTable::CallFunc(string name, vector<varType> &expectedAr
 	if (exist){
 		expectedArgs = funkyType.args;
 		ret = funkyType.retType;
-		if (CompareVecs(expList,expectedArgs)){
+		if (CompareVecs(expList, expectedArgs)){
 			return SUCCESS;
 		}
 		else
@@ -321,7 +314,7 @@ void SymbolTable::AddToFormalList(string varName, varType type){
 }
 
 void SymbolTable::AddToExpList(varType type){
-	expList.insert(expList.begin(),type);
+	expList.insert(expList.begin(), type);
 }
 
 void SymbolTable::FlushFormalList(){

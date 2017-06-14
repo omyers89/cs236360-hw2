@@ -29,6 +29,7 @@ typedef struct {
 	string name;
 	IdType t;
 	int offset;
+	bool isFunc;
 } TableEntry;
 
 typedef vector<TableEntry>::iterator TableIt;
@@ -38,12 +39,12 @@ private:
 	//map<string, VarData>* _vars;
 	vector<TableEntry>* _variables;
 
-	list<scopeType>* scopeList;
+	//list<scopeType>* scopeList;
 public: 
 	Table* _parentTable;
-	Table(Table* parentTable, scopeType newScopeType = _IF);
+	Table(Table* parentTable);
 	bool get(string varName, VarData& dat);
-	bool addVar(string name, VarData d);
+	bool addVar(string name, VarData d, bool isfunc = false);
 	bool contains(string name);
 	bool contains(string name, VarData &vd);
 	void printScope();
