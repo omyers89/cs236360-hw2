@@ -110,7 +110,9 @@ public:
 	void AddToFormalList(string varName, varType type);
 	void AddToExpList(varType type);
 	void FlushFormalList();
+
 	void FlushExpList();
+	void FlushExpList(int n);
 
 
 };

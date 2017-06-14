@@ -325,3 +325,14 @@ void SymbolTable::FlushFormalList(){
 void SymbolTable::FlushExpList(){
 	expList.clear();
 }
+
+void SymbolTable::FlushExpList(int n){
+	varIt begIt = expList.begin();
+	varIt endIt = expList.begin();
+	if (expList.size() >= n){
+		expList.clear();
+		return;
+	}
+	advance(endIt, n);
+	expList.erase(begIt, endIt);
+}
