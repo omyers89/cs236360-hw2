@@ -427,7 +427,6 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       } |
       Exp RELOP Exp
       {
-
 			varType out1;
                 if(!symbolTable->GetVar($1.varName,out1))
                 {
@@ -442,7 +441,6 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
                     //output::errorDef(yylineno,$3.varName.c_str());
                     //exit(0);
                 }
-				/* std::cout << "in Exp RELOP Exp: \nExp1 is:" << out1 << " Exp2 is" << out2 <<std::endl; */
 			if(!isNumeric(out1)  || !isNumeric(out2)) /* !areEqualTypes($1.type,$3.type) || ) */
             {
                 output::errorMismatch(yylineno);
@@ -452,28 +450,12 @@ Exp : LPAREN Exp RPAREN {$$.type = $2.type;} |
       } |
       Exp BINOP Exp
       {
-	  varType out1;
-                if(!symbolTable->GetVar($1.varName,out1))
-                {
-                    out1 = $1.type;
-					//output::errorDef(yylineno,$1.varName.c_str());
-                    //exit(0);
-                }
-			varType out2;
-                if(!symbolTable->GetVar($3.varName,out2))
-                {
-					out2 = $3.type;
-                    //output::errorDef(yylineno,$3.varName.c_str());
-                    //exit(0);
-                }
-		//std::cout << "in Exp BINOP Exp: \nExp1 is:" << out1 << " Exp2 is" << out2 <<std::endl;
-
-            if(!isNumeric(out1) || !isNumeric(out2))
-            {
-                output::errorMismatch(yylineno);
-                exit(0);
-            }
-            $$.type = (out1 == _BYTE) ? out2 : out1; /* Noam Yogev you are genius */
+	        if(!isNumeric($1.type) || !isNumeric($3.type))
+	        {
+	            output::errorMismatch(yylineno);
+	            exit(0);
+	        }
+	        $$.type = (isInt($1.type))?$1.type:$3.type;
       }
     ;
 
