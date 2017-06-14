@@ -230,7 +230,7 @@ bool CompareVecs(vector<varType> &callArgs, vector<varType> &expectedArgs){
 	vector<varType>::iterator it_e = expectedArgs.begin();
 	while (it_c != callArgs.end() && it_e != expectedArgs.end())
 	{
-		if (areEqualTypes(*it_e, *it_c)){ return false; }
+		if (! areEqualTypes(*it_e, *it_c)){ return false; }
 		it_c++;
 		it_e++;
 	}
