@@ -342,7 +342,7 @@ Call : ID LPAREN ExpList RPAREN
             }
             if(res == NOT_DEFINED)
             {
-                output::errorUndef(yylineno,$1.varName.c_str());
+                output::errorUndefFunc(yylineno,$1.varName.c_str());
                 exit(0);
             }
             $$.type = retType;
